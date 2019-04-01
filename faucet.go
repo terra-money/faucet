@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"github.com/dpapathanasiou/go-recaptcha"
+
+	recaptcha "github.com/dpapathanasiou/go-recaptcha"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/tendermint/tmlibs/bech32"
 	"github.com/tomasen/realip"
@@ -47,16 +49,50 @@ var dailyLimitTable = map[string]int{
 
 const (
 	requestLimitSecs = 30
+
+	keyVar      = "key"
+	nodeVar     = "node"
+	chainIDVar  = "chain-id"
+	passwordVar = "pass"
 )
 
-type claimStruct struct {
+// Claim wraps a faucet claim
+type Claim struct {
 	Address  string
 	Response string
 	Denom    string
 }
+
+// Coin is the same as sdk.Coin
 type Coin struct {
 	Denom  string `json:"denom"`
 	Amount int    `json:"amount"`
+}
+
+// Env wraps env variables stored in env.json
+type Env struct {
+	Key   string `json:"key"`
+	Node  string `json:"node"`
+	Chain string `json:"chain-id"`
+	Pass  string `json:"pass"`
+}
+
+func readEnvFile() {
+	data, err := ioutil.ReadFile("./env.json")
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	var env Env
+	err = json.Unmarshal(data, &env)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	os.Setenv(keyVar, env.Key)
+	os.Setenv(nodeVar, env.Node)
+	os.Setenv(chainIDVar, env.Chain)
+	os.Setenv(passwordVar, env.Pass)
 }
 
 func main() {
@@ -66,22 +102,22 @@ func main() {
 	}
 	defer db.Close()
 
-	key = os.Getenv("KEY")
+	key = os.Getenv(keyVar)
 	if key == "" {
 		key = "faucet"
 	}
 
-	node = os.Getenv("NODE")
+	node = os.Getenv(node)
 	if node == "" {
 		node = "http://localhost:46657"
 	}
 
-	chain = os.Getenv("CHAIN")
+	chain = os.Getenv(chainIDVar)
 	if chain == "" {
 		chain = "soju-0005"
 	}
 
-	pass = os.Getenv("PASS")
+	pass = os.Getenv(passwordVar)
 	if pass == "" {
 		pass = "12345678"
 	}
@@ -133,6 +169,7 @@ func getCmd(command string) *exec.Cmd {
 	return cmd
 }
 
+// RequestLog stores the Log of a Request
 type RequestLog struct {
 	Coins     []Coin    `json:"coin"`
 	Requested time.Time `json:"updated"`
@@ -201,7 +238,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
-		var claim claimStruct
+		var claim Claim
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -246,7 +283,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		if captchaPassed {
 			amount := amountTable[claim.Denom]
 			sendFaucet := fmt.Sprintf(
-				"terracli tx send %v %v%v --from %v --chain-id %v --fees 2luna",
+				"terracli tx send %v %v%v --from %v --chain-id %v --fees 1luna",
 				encodedAddress, amount, claim.Denom, key, chain)
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
 			executeCmd(sendFaucet, pass)
