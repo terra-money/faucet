@@ -1,0 +1,42 @@
+html {
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Gotham A', 'Gotham B', 'Helvetica Neue', 'Arial', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fe !important;
+  color: #2043b5 !important;
+  font-size: 16px !important;
+  font-style: normal;
+  letter-spacing: -0.2px !important;
+  padding: 50px 0 0;
+}
+
+input,
+textarea,
+button {
+  font-family: 'Gotham A', 'Gotham B', 'Helvetica Neue', 'Arial', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.2px !important;
+}
+
+a {
+  color: #5493f7;
+  text-decoration: none;
+}
+
+@media screen and (min-width: 360px) {
+  body {
+    padding: 50px 10px 0;
+  }
+}
+
+@media screen and (min-width: 680px) {
+}

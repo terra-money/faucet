@@ -1,0 +1,17 @@
+faucetcosmos.network {
+    gzip
+    proxy / localhost:8080 {
+        transparent
+    }
+    ratelimit * /claim 1 1 day
+}
+
+faucet.cosmos.network {
+    gzip
+    proxy / localhost:8080 {
+        transparent
+    }
+    ratelimit * /claim 1 1 day
+}
+
+

@@ -1,0 +1,239 @@
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 16px; /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
+  margin-top: -2px;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}
+
+header {
+  background: #2845ae url(/assets/terra_faucet.svg) top 15px left 20px no-repeat;
+  background-size: 120px auto;
+  text-align: right;
+  color: #fff;
+  font-weight: 300;
+  height: 50px;
+  line-height: 50px;
+  padding: 0 20px;
+  font-size: 14px;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  span {
+    font-weight: 500;
+    color: #fff;
+  }
+}
+
+footer {
+  text-align: center;
+  padding: 20px 20px 30px;
+  font-size: 14px;
+  span {
+    font-weight: 700;
+  }
+}
+
+section {
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border-radius: 5px;
+  margin: 10px auto;
+  padding: 30px 10px;
+  border: solid 1px #e4e8f6;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  h2 {
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.25;
+    letter-spacing: -1px;
+  }
+  article {
+    line-height: 1.5;
+  }
+  .recaptcha {
+    margin: 30px 0 20px;
+  }
+  .inputContainer {
+    ::placeholder {
+      /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: rgba(14, 60, 165, 0.5) !important;
+      opacity: 1; /* Firefox */
+    }
+    :-ms-input-placeholder {
+      /* Internet Explorer 10-11 */
+      color: rgba(14, 60, 165, 0.5) !important;
+    }
+    ::-ms-input-placeholder {
+      /* Microsoft Edge */
+      color: rgba(14, 60, 165, 0.5) !important;
+    }
+    .input {
+      position: relative;
+      margin: 20px 0;
+      input {
+        appearance: none;
+        background: #fff;
+        border: solid 1px #ced8ea;
+        border-radius: 5px;
+        height: 48px;
+        padding: 0 10px;
+        width: 100%;
+        outline: 0;
+        color: #2043b5;
+        box-sizing: border-box;
+        font-size: 16px;
+        -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+        &:disabled,
+        &:read-only {
+          background: rgba(14, 60, 165, 0.03);
+        }
+        &:focus {
+          border: solid 1px #859dca;
+        }
+      }
+    }
+    .select {
+      position: relative;
+      margin: 20px 0;
+      &:last-child {
+        margin-bottom: 0;
+      }
+      select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 5px;
+        background: #fff;
+        width: 100%;
+        color: #2043b5;
+        padding: 0 10px;
+        height: 48px;
+        font-size: 16px;
+        border: solid 1px #ced8ea;
+        box-sizing: border-box;
+        outline: 0;
+        &:focus {
+          border: solid 1px #859dca;
+        }
+        option {
+          background-color: inherit;
+          font-family: inherit;
+          color: inherit;
+        }
+      }
+      .selectAddon {
+        position: absolute;
+        top: 1px;
+        right: 1px;
+        bottom: 1px;
+        text-align: center;
+        box-sizing: border-box;
+        border-left: solid 1px #ced8ea;
+        text-align: center;
+        pointer-events: none;
+        line-height: 46px;
+        width: 46px;
+        i {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+  .buttonContainer {
+    padding: 30px 0 10px;
+    button {
+      appearance: none;
+      height: 48px;
+      line-height: 48px;
+      padding: 0 40px 0 35px;
+      border: 0;
+      font-size: 16px;
+      background: #5493f7;
+      color: #fff;
+      border-radius: 25px;
+      box-shadow: 0 1px 1px 0 rgba(14, 60, 165, 0.1);
+      outline: 0;
+      width: 100%;
+      cursor: pointer;
+      &:first-of-type {
+        margin-bottom: 12px;
+      }
+      &:only-of-type {
+        margin-bottom: 0;
+      }
+      &.light {
+        background: rgba(32, 67, 181, 0.1);
+        color: #2043b5;
+      }
+    }
+
+    button:disabled,
+    button[disabled] {
+      background: rgba(84, 147, 247, 0.5);
+    }
+    i {
+      margin-right: 10px;
+    }
+  }
+}
+
+@media screen and (min-width: 360px) {
+  section {
+    border-radius: 5px;
+    padding: 30px 20px;
+  }
+}
+
+@media screen and (min-width: 375px) {
+  section {
+    border-radius: 5px;
+    padding: 30px 25px;
+  }
+}
+
+@media screen and (min-width: 400px) {
+  section {
+    border-radius: 5px;
+    padding: 30px 30px;
+  }
+}
+
+@media screen and (min-width: 680px) {
+  section {
+    margin: 20px auto;
+    padding: 40px 40px;
+    .buttonContainer {
+      button {
+        width: auto;
+      }
+    }
+  }
+}
