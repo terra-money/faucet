@@ -1,6 +1,6 @@
 # Terra Testnet Faucet
 
-This faucet app allows anyone to easily request 10 faucetToken and 1 steak. This app needs to be deployed on a Cosmos testnet full node, because it relies on using the `gaiacli` command to send tokens.
+This faucet app allows anyone to easily request 10 faucetToken and 1 steak. This app needs to be deployed on a Cosmos testnet full node, because it relies on using the `terracli` command to send tokens.
 
 ## Get reCAPTCHA Key
 
@@ -17,7 +17,7 @@ sitekey: "6LdqyV0UAAAAAEqgBxvSsDpL2aeTEgkz_VTz1Vi1"
 The faucet requires 4 different enviroment variables to set in order to function. They are: 
 
 1. `KEY`, the name of your faucet account.
-2. `NODE`, the address of your `gaiad` node (probably don't have to change)
+2. `NODE`, the address of your `terrad` node (probably don't have to change)
 3. `CHAIN`, the chain id of the testnet.
 4. `PASS`, the password of your faucet account.
 
@@ -36,7 +36,7 @@ if node == "" {
 
 chain = os.Getenv("CHAIN")
 if chain == "" {
-  chain = "soju-0004"
+  chain = "soju-0005"
 }
 
 pass = os.Getenv("PASS")
