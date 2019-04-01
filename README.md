@@ -19,7 +19,7 @@ If you don't have a testnet address, or don't know what the Soju testnet is, ple
 
 The faucet app offers both a backend and a frontend. Here we offer instructions to deploy both. 
 
-### Deploy faucet server
+### Deploy faucet server (backend)
 
 You must have `terrad` installed and running on your machine before deploying the faucet server. Follow [setup docs](https://github.com/terra-project/core/docs/guide/README.md) to deploy Terrad if you haven't already. 
 
@@ -73,7 +73,7 @@ Deploying the faucet frontend is simple. It is a trivial React app.
 From the topmost directory, run: 
 
 ```
-cd ./frontend
+cd $GOPATH/src/github.com/terra-project/faucet/frontend
 npm install
 npm start 
 ```
