@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
+	"github.com/dpapathanasiou/go-recaptcha"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/tendermint/tmlibs/bech32"
 	"github.com/tomasen/realip"
