@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 // import cx from "classnames";
-import Reaptcha from "reaptcha";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import b32 from "../../scripts/b32";
+import Reaptcha from 'reaptcha';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
+import b32 from '../../scripts/b32';
 
-import "react-toastify/dist/ReactToastify.css";
+import 'react-toastify/dist/ReactToastify.css';
 
-import "../../App.scss";
+import '../../App.scss';
 
 const bech32Validate = param => {
   try {
@@ -20,8 +20,8 @@ const bech32Validate = param => {
 };
 
 const sendSchema = Yup.object().shape({
-  address: Yup.string().required("Required"),
-  denom: Yup.string().required("Required")
+  address: Yup.string().required('Required'),
+  denom: Yup.string().required('Required')
 });
 
 class HomeComponent extends React.Component {
@@ -67,15 +67,15 @@ class HomeComponent extends React.Component {
           </div>
           <Formik
             initialValues={{
-              address: "",
-              denom: ""
+              address: '',
+              denom: ''
             }}
             validationSchema={sendSchema}
             onSubmit={(values, { resetForm }) => {
               // same shape as initial values
               this.setState({ sending: true });
               axios
-                .post("/claim", {
+                .post('/claim', {
                   address: values.address,
                   denom: values.denom
                 })
@@ -106,7 +106,7 @@ class HomeComponent extends React.Component {
                   ) : null}
                 </div>
                 <div className="select">
-                  <Field className="select" component="select" name="denom">
+                  <Field component="select" name="denom">
                     <option
                       value=""
                       disabled="disabled"
@@ -135,10 +135,7 @@ class HomeComponent extends React.Component {
                 </div>
 
                 <div className="buttonContainer">
-                  <button
-                    disabled={!this.state.verified}
-                    type="submit"
-                  >
+                  <button disabled={!this.state.verified} type="submit">
                     <i aria-hidden="true" className="material-icons">
                       send
                     </i>
