@@ -96,12 +96,9 @@ section {
       color: rgba(14, 60, 165, 0.5) !important;
     }
     .fieldError {
-      color: #FF5561;
+      color: #ff5561;
       padding: 5px 3px 0;
       font-size: 13px;
-    }
-    .selectFieldError {
-      margin-top: -20px
     }
     .input {
       position: relative;
@@ -159,7 +156,7 @@ section {
       }
       .selectAddon {
         position: absolute;
-        top: 20px;
+        top: 1px;
         right: 1px;
         bottom: 1px;
         text-align: center;
@@ -177,7 +174,7 @@ section {
     }
   }
   .buttonContainer {
-    padding: 30px 0 10px;
+    padding: 20px 0 10px;
     button {
       appearance: none;
       height: 48px;
