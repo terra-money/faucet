@@ -26,25 +26,14 @@ var chain string
 var pass string
 
 var amountTable = map[string]int{
-	"luna": 10,
-	"krw":  10000,
-	"usd":  10,
-	"sdr":  10,
-	"gbp":  10,
-	"eur":  10,
-	"jpy":  1000,
-	"cny":  100,
-}
-
-var dailyLimitTable = map[string]int{
-	"luna": 100,
-	"krw":  100000,
-	"usd":  100,
-	"sdr":  100,
-	"gbp":  10,
-	"eur":  100,
-	"jpy":  10000,
-	"cny":  1000,
+	MicroLunaDenom: 10 * MicroUnit,
+	MicroKRWDenom:  10000 * MicroUnit,
+	MicroUSDDenom:  10 * MicroUnit,
+	MicroSDRDenom:  10 * MicroUnit,
+	MicroGBPDenom:  10 * MicroUnit,
+	MicroEURDenom:  10 * MicroUnit,
+	MicroJPYDenom:  1000 * MicroUnit,
+	MicroCNYDenom:  100 * MicroUnit,
 }
 
 const (
@@ -181,7 +170,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 	// try to update coin
 	for idx, coin := range requestLog.Coins {
 		if coin.Denom == denom {
-			if (coin.Amount + amount) > dailyLimitTable[denom] {
+			if (coin.Amount + amount) > amountTable[denom]*10 {
 				return errors.New("exceed denom limit")
 			}
 
@@ -283,7 +272,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		if captchaPassed {
 			amount := amountTable[claim.Denom]
 			sendFaucet := fmt.Sprintf(
-				"terracli tx send %v %v%v --from %v --chain-id %v --fees 1luna",
+				"terracli tx send %v %v%v --from %v --chain-id %v --fees 10mluna",
 				encodedAddress, amount, claim.Denom, key, chain)
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
 			executeCmd(sendFaucet, pass)
