@@ -2,6 +2,11 @@
   "name": "faucet-app",
   "version": 2,
   "alias": "faucet.terra.money",
+  "build": {
+    "env": {
+      "REACT_APP_API_HOST": "faucet-api.chai.finance"
+    }
+  },
   "builds": [
     {
       "src": "frontend/package.json",
