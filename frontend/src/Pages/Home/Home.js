@@ -72,7 +72,6 @@ class HomeComponent extends React.Component {
             }}
             validationSchema={sendSchema}
             onSubmit={(values, { resetForm }) => {
-              console.log(resetForm);
               // same shape as initial values
               this.setState({ sending: true });
               axios
