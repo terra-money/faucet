@@ -75,7 +75,7 @@ class HomeComponent extends React.Component {
               // same shape as initial values
               this.setState({ sending: true });
               axios
-                .post('/claim', {
+                .post('https://faucet-api.terra.money/claim', {
                   address: values.address,
                   denom: values.denom
                 })
