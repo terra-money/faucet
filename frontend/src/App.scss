@@ -95,6 +95,14 @@ section {
       /* Microsoft Edge */
       color: rgba(14, 60, 165, 0.5) !important;
     }
+    .fieldError {
+      color: #FF5561;
+      padding: 5px 3px 0;
+      font-size: 13px;
+    }
+    .selectFieldError {
+      margin-top: -20px
+    }
     .input {
       position: relative;
       margin: 20px 0;
@@ -151,7 +159,7 @@ section {
       }
       .selectAddon {
         position: absolute;
-        top: 1px;
+        top: 20px;
         right: 1px;
         bottom: 1px;
         text-align: center;
@@ -159,8 +167,9 @@ section {
         border-left: solid 1px #ced8ea;
         text-align: center;
         pointer-events: none;
-        line-height: 46px;
-        width: 46px;
+        line-height: 48px;
+        height: 48px;
+        width: 48px;
         i {
           font-size: 18px;
         }
