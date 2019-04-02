@@ -1,0 +1,22 @@
+{
+  "name": "faucet-app",
+  "version": 2,
+  "alias": "faucet.terra.money",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@now/static-build",
+      "config": { "distDir": "build" }
+    }
+  ],
+  "routes": [
+    { "src": "/static/(.*)", "headers": { "cache-control": "s-maxage=31536000,immutable" }, "dest": "/frontend/static/$1" },
+    { "src": "/favicon.ico", "dest": "/frontend/favicon.ico" },
+    { "src": "/asset-manifest.json", "dest": "/frontend/asset-manifest.json" },
+    { "src": "/manifest.json", "dest": "/frontend/manifest.json" },
+    { "src": "/precache-manifest.(.*)", "dest": "/frontend/precache-manifest.$1" },
+    { "src": "/service-worker.js", "headers": { "cache-control": "s-maxage=0" }, "dest": "/frontend/service-worker.js" },
+    { "src": "/(.*)", "headers": { "cache-control": "s-maxage=0" }, "dest": "/frontend/index.html" }
+  ],
+  "regions": ["sfo1", "hnd1", "bru1"]
+}
