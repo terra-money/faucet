@@ -100,7 +100,7 @@ class HomeComponent extends React.Component {
             {({ errors, touched }) => (
               <Form className="inputContainer">
                 <div className="input">
-                  <Field name="address" validate={bech32Validate} />
+                  <Field name="address" placeholder="Testnet address" validate={bech32Validate} />
                   {errors.address && touched.address ? (
                     <div className="fieldError">{errors.address}</div>
                   ) : null}
