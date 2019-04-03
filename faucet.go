@@ -255,7 +255,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// make sure captcha is valid
 		clientIP := realip.FromRequest(request)
-		captchaResponse := claim.Response		
+		captchaResponse := claim.Response
 		captchaPassed, captchaErr := recaptcha.Confirm(clientIP, captchaResponse)
 		if captchaErr != nil {
 			panic(captchaErr)
@@ -276,6 +276,8 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
 			executeCmd(sendFaucet, pass)
 
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, "{\"amount\": %v}", amount)
 		} else {
 			fmt.Println("Captcha Failed")
 		}

@@ -82,10 +82,12 @@ class HomeComponent extends React.Component {
                   denom: values.denom,
                   response: this.state.response
                 })
-                .then(() => {
+                .then(response => {
+                  const { amount } = response.data;
+
                   this.setState({ sending: false });
                   toast.success(
-                    `Successfully Sent, Sent tokens to ${this.fields.address}`
+                    `Successfully Sent ${amount} tokens to ${values.address}`
                   );
 
                   resetForm();
