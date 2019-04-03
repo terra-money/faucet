@@ -29,12 +29,14 @@ class HomeComponent extends React.Component {
     super(props);
     this.state = {
       sending: false,
-      verified: false
+      verified: false,
+      response: ''
     };
   }
 
-  onVerify = () => {
+  onVerify = response => {
     this.setState({
+      response,
       verified: true
     });
   };
@@ -75,9 +77,10 @@ class HomeComponent extends React.Component {
               // same shape as initial values
               this.setState({ sending: true });
               axios
-                .post('https://faucet-api.terra.money/claim', {
+                .post('/claim', {
                   address: values.address,
-                  denom: values.denom
+                  denom: values.denom,
+                  response: this.state.response
                 })
                 .then(() => {
                   this.setState({ sending: false });

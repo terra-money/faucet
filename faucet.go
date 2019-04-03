@@ -117,7 +117,7 @@ func main() {
 	} else {
 		recaptcha.Init(os.Args[1])
 
-		http.Handle("/", http.FileServer(http.Dir("./frontend/dist/")))
+		http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 		http.HandleFunc("/claim", createGetCoinsHandler(db))
 
 		if err := http.ListenAndServe("127.0.0.1:3000", nil); err != nil {
@@ -255,7 +255,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// make sure captcha is valid
 		clientIP := realip.FromRequest(request)
-		captchaResponse := claim.Response
+		captchaResponse := claim.Response		
 		captchaPassed, captchaErr := recaptcha.Confirm(clientIP, captchaResponse)
 		if captchaErr != nil {
 			panic(captchaErr)
@@ -265,7 +265,6 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		limitErr := checkAndUpdateLimit(db, decodedAddress, claim.Denom)
 		if limitErr != nil {
 			panic(limitErr)
-			return
 		}
 
 		// send the coins!
