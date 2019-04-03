@@ -1,9 +1,17 @@
-FROM golang:latest
+FROM golang:latest as builder
 
-RUN mkdir -p "$GOPATH/src/github.com/terra-project/faucet"
-WORKDIR $GOPATH/src/github.com/terra-project/faucet
-COPY faucet.go .
+WORKDIR /app
+ENV GO111MODULE=on
 
-RUN go install -v ./...
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-CMD ["faucet"]
+COPY *.go ./
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
+
+FROM scratch
+COPY --from=builder /app/faucet /app/
+
+EXPOSE 3000
+CMD ["/app/faucet"]
