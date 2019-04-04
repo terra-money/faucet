@@ -96,7 +96,7 @@ func main() {
 		key = "faucet"
 	}
 
-	node = os.Getenv(node)
+	node = os.Getenv(nodeVar)
 	if node == "" {
 		node = "http://localhost:46657"
 	}
@@ -272,8 +272,8 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		if captchaPassed {
 			amount := amountTable[claim.Denom]
 			sendFaucet := fmt.Sprintf(
-				"terracli tx send %v %v%v --from %v --chain-id %v --fees 10mluna",
-				encodedAddress, amount, claim.Denom, key, chain)
+				"terracli tx send %v %v%v --from %v --chain-id %v --fees 10mluna --node %v",
+				encodedAddress, amount, claim.Denom, key, chain, node)
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
 			executeCmd(sendFaucet, pass)
 
