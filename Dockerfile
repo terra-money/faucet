@@ -1,9 +1,28 @@
-FROM golang:latest
+# node build
+FROM node:lts-alpine as node-builder
+WORKDIR /app/frontend
+COPY /frontend/package*.json ./
+RUN yarn install
+COPY /frontend/ .
+RUN yarn run build
 
-RUN mkdir -p "$GOPATH/src/github.com/terra-project/faucet"
-WORKDIR $GOPATH/src/github.com/terra-project/faucet
-COPY faucet.go .
+# go build
+FROM golang:latest as go-builder
+WORKDIR /app
+ENV GO111MODULE=on
 
-RUN go install -v ./...
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
-CMD ["faucet"]
+COPY *.go ./
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
+
+# staging
+FROM alpine:latest
+WORKDIR /app
+COPY --from=node-builder /app/frontend/build /app/frontend/dist/
+COPY --from=go-builder /app/faucet /app/
+
+EXPOSE 3000
+CMD ["/app/faucet"]

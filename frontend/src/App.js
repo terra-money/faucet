@@ -11,7 +11,7 @@ class App extends Component {
     return (
       <Router>
         <header>
-          testnet: <span>soju-0005</span>
+          testnet: <span>{process.env.REACT_APP_CHAIN_ID}</span>
         </header>
         <Route />
         <footer>
