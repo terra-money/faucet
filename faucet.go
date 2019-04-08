@@ -95,7 +95,7 @@ func main() {
 	}
 	defer db.Close()
 
-  readEnvFile()
+	readEnvFile()
 	key = os.Getenv(keyVar)
 	if key == "" {
 		key = "faucet"
