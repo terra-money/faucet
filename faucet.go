@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +27,7 @@ var key string
 var node string
 var chain string
 var pass string
+var sequence int64
 
 var amountTable = map[string]int{
 	MicroLunaDenom: 10 * MicroUnit,
@@ -103,7 +107,7 @@ func main() {
 
 	chain = os.Getenv(chainIDVar)
 	if chain == "" {
-		chain = "soju-0005"
+		chain = "soju-0006"
 	}
 
 	pass = os.Getenv(passwordVar)
@@ -117,10 +121,31 @@ func main() {
 	} else {
 		recaptcha.Init(os.Args[1])
 
+		fmt.Println("chain:", chain)
+		fmt.Println("node:", node)
+
+		// Query current faucet sequence
+		queryCommand := fmt.Sprintf(
+			"terracli query account terra12c5s58hnc3c0pjr5x7u68upsgzg2r8fwq5nlsy --chain-id %v --node %v -o json",
+			chain, node)
+		_, _, out := goExecute(queryCommand)
+
+		// Capture seqeunce string from json
+		r := regexp.MustCompile(`"sequence":"(\d+)"`)
+		groups := r.FindStringSubmatch(out)
+
+		if len(groups) != 2 {
+			fmt.Printf("cannot find sequence")
+			os.Exit(1)
+		}
+
+		// Convert sequence string to int64
+		sequence, _ = strconv.ParseInt(groups[1], 10, 64)
+
 		http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 		http.HandleFunc("/claim", createGetCoinsHandler(db))
 
-		if err := http.ListenAndServe("127.0.0.1:3000", nil); err != nil {
+		if err := http.ListenAndServe(":3000", nil); err != nil {
 			log.Fatal("failed to start server", err)
 		}
 	}
@@ -135,13 +160,20 @@ func executeCmd(command string, writes ...string) {
 	_ = cmd.Wait()
 }
 
-func goExecute(command string) (cmd *exec.Cmd, pipeIn io.WriteCloser, pipeOut io.ReadCloser) {
+func goExecute(command string) (cmd *exec.Cmd, pipeIn io.WriteCloser, output string) {
 	cmd = getCmd(command)
 	pipeIn, _ = cmd.StdinPipe()
-	pipeOut, _ = cmd.StdoutPipe()
+	// pipeOut, _ = cmd.StdoutPipe()
+
+	var stdBuffer bytes.Buffer
+	mw := io.MultiWriter(os.Stdout, &stdBuffer)
+
+	cmd.Stdout = mw
+	cmd.Stderr = mw
+
 	go cmd.Start()
 	time.Sleep(time.Second)
-	return cmd, pipeIn, pipeOut
+	return cmd, pipeIn, stdBuffer.String()
 }
 
 func getCmd(command string) *exec.Cmd {
@@ -271,9 +303,10 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		if captchaPassed {
 			amount := amountTable[claim.Denom]
 			sendFaucet := fmt.Sprintf(
-				"terracli tx send %v %v%v --from %v --chain-id %v --fees 10mluna --node %v",
-				encodedAddress, amount, claim.Denom, key, chain, node)
+				"terracli tx send %v %v%v --from %v --chain-id %v --fees 10mluna --node %v --async --sequence %v",
+				encodedAddress, amount, claim.Denom, key, chain, node, sequence)
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
+			sequence = sequence + 1
 			executeCmd(sendFaucet, pass)
 
 			w.Header().Set("Content-Type", "application/json")
