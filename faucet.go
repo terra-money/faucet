@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -21,13 +19,26 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/tendermint/tmlibs/bech32"
 	"github.com/tomasen/realip"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	bip39 "github.com/cosmos/go-bip39"
+
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
-var key string
-var node string
+var mnemonic string
+var lcd string
 var chain string
-var pass string
-var sequence int64
+var privKey crypto.PrivKey
+var address string
+var sequence uint64
+var accountNumber uint64
+var cdc *codec.Codec
 
 var amountTable = map[string]int{
 	MicroLunaDenom: 10 * MicroUnit,
@@ -43,10 +54,9 @@ var amountTable = map[string]int{
 const (
 	requestLimitSecs = 30
 
-	keyVar      = "key"
-	nodeVar     = "node"
+	mnemonicVar = "mnemonic"
+	lcdVar      = "lcd"
 	chainIDVar  = "chain-id"
-	passwordVar = "pass"
 )
 
 // Claim wraps a faucet claim
@@ -64,10 +74,22 @@ type Coin struct {
 
 // Env wraps env variables stored in env.json
 type Env struct {
-	Key   string `json:"key"`
-	Node  string `json:"node"`
-	Chain string `json:"chain-id"`
-	Pass  string `json:"pass"`
+	Mnemonic string `json:"mnemonic"`
+	Lcd      string `json:"lcd"`
+	Chain    string `json:"chain-id"`
+}
+
+func newCodec() *codec.Codec {
+	cdc := codec.New()
+	sdk.RegisterCodec(cdc)
+	auth.RegisterCodec(cdc)
+	bank.RegisterCodec(cdc)
+	codec.RegisterCrypto(cdc)
+
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount("terra", "terrapub")
+
+	return cdc
 }
 
 func readEnvFile() {
@@ -82,10 +104,9 @@ func readEnvFile() {
 		fmt.Println("error:", err)
 	}
 
-	os.Setenv(keyVar, env.Key)
-	os.Setenv(nodeVar, env.Node)
+	os.Setenv(mnemonicVar, env.Mnemonic)
+	os.Setenv(lcdVar, env.Lcd)
 	os.Setenv(chainIDVar, env.Chain)
-	os.Setenv(passwordVar, env.Pass)
 }
 
 func main() {
@@ -96,14 +117,14 @@ func main() {
 	defer db.Close()
 
 	readEnvFile()
-	key = os.Getenv(keyVar)
-	if key == "" {
-		key = "faucet"
+	mnemonic = os.Getenv(mnemonicVar)
+	if mnemonic == "" {
+		mnemonic = "faucet"
 	}
 
-	node = os.Getenv(nodeVar)
-	if node == "" {
-		node = "http://localhost:46657"
+	lcd = os.Getenv(lcdVar)
+	if lcd == "" {
+		lcd = "http://localhost:1317"
 	}
 
 	chain = os.Getenv(chainIDVar)
@@ -111,9 +132,22 @@ func main() {
 		chain = "soju-0006"
 	}
 
-	pass = os.Getenv(passwordVar)
-	if pass == "" {
-		pass = "12345678"
+	cdc = newCodec()
+
+	seed := bip39.NewSeed(mnemonic, "")
+	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
+	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, hd.FullFundraiserPath)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	privKey = secp256k1.PrivKeySecp256k1(derivedPriv)
+	pubk := privKey.PubKey()
+	address, err = bech32.ConvertAndEncode("terra", pubk.Address())
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 
 	if len(os.Args) != 2 {
@@ -123,25 +157,26 @@ func main() {
 		recaptcha.Init(os.Args[1])
 
 		fmt.Println("chain:", chain)
-		fmt.Println("node:", node)
+		fmt.Println("lcd:", lcd)
 
 		// Query current faucet sequence
-		queryCommand := fmt.Sprintf(
-			"terracli query account terra12c5s58hnc3c0pjr5x7u68upsgzg2r8fwq5nlsy --chain-id %v --node %v -o json",
-			chain, node)
-		_, _, out := goExecute(queryCommand)
-
-		// Capture seqeunce string from json
-		r := regexp.MustCompile(`"sequence":"(\d+)"`)
-		groups := r.FindStringSubmatch(out)
-
-		if len(groups) != 2 {
-			fmt.Printf("cannot find sequence")
-			os.Exit(1)
+		url := fmt.Sprintf("%v/auth/accounts/%v", lcd, address)
+		response, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
 		}
 
-		// Convert sequence string to int64
-		sequence, _ = strconv.ParseInt(groups[1], 10, 64)
+		defer response.Body.Close()
+
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"(\d+)"`, string(body)), 10, 64)
+		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"(\d+)"`, string(body)), 10, 64)
 
 		http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 		http.HandleFunc("/claim", createGetCoinsHandler(db))
@@ -152,43 +187,19 @@ func main() {
 	}
 }
 
-func executeCmd(command string, writes ...string) {
-	cmd, wc, _ := goExecute(command)
+func parseRegexp(regexpStr string, target string) (data string) {
+	// Capture seqeunce string from json
+	r := regexp.MustCompile(regexpStr)
+	groups := r.FindStringSubmatch(string(target))
 
-	for _, write := range writes {
-		_, _ = wc.Write([]byte(write + "\n"))
-	}
-	_ = cmd.Wait()
-}
-
-func goExecute(command string) (cmd *exec.Cmd, pipeIn io.WriteCloser, output string) {
-	cmd = getCmd(command)
-	pipeIn, _ = cmd.StdinPipe()
-	// pipeOut, _ = cmd.StdoutPipe()
-
-	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-
-	cmd.Stdout = mw
-	cmd.Stderr = mw
-
-	go cmd.Start()
-	time.Sleep(time.Second)
-	return cmd, pipeIn, stdBuffer.String()
-}
-
-func getCmd(command string) *exec.Cmd {
-	// split command into command and args
-	split := strings.Split(command, " ")
-
-	var cmd *exec.Cmd
-	if len(split) == 1 {
-		cmd = exec.Command(split[0])
-	} else {
-		cmd = exec.Command(split[0], split[1:]...)
+	if len(groups) != 2 {
+		fmt.Printf("cannot find data")
+		os.Exit(1)
 	}
 
-	return cmd
+	// Convert sequence string to int64
+	data = groups[1]
+	return
 }
 
 // RequestLog stores the Log of a Request
@@ -260,6 +271,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
+
 		var claim Claim
 
 		defer func() {
@@ -303,19 +315,106 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		// send the coins!
 		if captchaPassed {
 			amount := amountTable[claim.Denom]
-			sendFaucet := fmt.Sprintf(
-				"terracli tx send %v %v%v --from %v --chain-id %v --fees 10mluna --node %v --async --sequence %v",
-				encodedAddress, amount, claim.Denom, key, chain, node, sequence)
+			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcd, encodedAddress)
+			data := strings.TrimSpace(fmt.Sprintf(`{
+				"base_req": {
+					"from": "%v",
+					"memo": "%v",
+					"chain_id": "%v",
+					"sequence": "%v",
+					"fees": [
+						{
+							"denom": "%v",
+							"amount": "%v"
+						}
+					]
+				},
+				"amount": [
+					{
+						"denom": "%v",
+						"amount": "%v"
+					}
+				]
+			}`, address, "faucet", chain, sequence, "mluna", "10", claim.Denom, amount))
+
+			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
+			if err != nil {
+				panic(err)
+			}
+
+			if response.StatusCode != 200 {
+				err := errors.New(response.Status)
+				panic(err)
+			}
+
+			defer response.Body.Close()
+
+			body, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				panic(err)
+			}
+
+			resJSON := signAndBroadcast(body)
+
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
+			fmt.Println(resJSON)
+
 			sequence = sequence + 1
-			executeCmd(sendFaucet, pass)
 
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintf(w, "{\"amount\": %v}", amount)
+			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, resJSON)
 		} else {
-			fmt.Println("Captcha Failed")
+			err := errors.New("Captcha Failed")
+			panic(err)
 		}
 
 		return
 	}
+}
+
+// BroadcastReq defines a tx broadcasting request.
+type BroadcastReq struct {
+	Tx     auth.StdTx `json:"tx"`
+	Return string     `json:"return"`
+}
+
+func signAndBroadcast(txJSON []byte) string {
+	var broadcastReq BroadcastReq
+	var stdTx auth.StdTx
+
+	cdc.MustUnmarshalJSON(txJSON, &stdTx)
+	signBytes := auth.StdSignBytes(chain, accountNumber, sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
+	sig, err := privKey.Sign(signBytes)
+	if err != nil {
+		panic(err)
+	}
+
+	sigs := []auth.StdSignature{{
+		PubKey:    privKey.PubKey(),
+		Signature: sig}}
+	tx := auth.NewStdTx(stdTx.Msgs, stdTx.Fee, sigs, stdTx.Memo)
+	broadcastReq.Tx = tx
+	broadcastReq.Return = "async"
+
+	bz := cdc.MustMarshalJSON(broadcastReq)
+
+	url := fmt.Sprintf("%v/txs", lcd)
+	response, err := http.Post(url, "application/json", bytes.NewReader(bz))
+	if err != nil {
+		panic(err)
+	}
+
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	if response.StatusCode != 200 {
+		err := fmt.Errorf("status: %v, message: %v", response.Status, string(body))
+		panic(err)
+	}
+
+	return string(body)
 }
