@@ -37,19 +37,18 @@ sitekey: "6LdqyV0UAAAAAEqgBxvSsDpL2aeTEgkz_VTz1Vi1"
 
 The faucet requires 4 different enviroment variables to set in order to function. They are: 
 
-1. `KEY`, the name of your faucet account.
-2. `NODE`, the address of your `terrad` node (probably don't have to change)
-3. `CHAIN`, the chain id of the testnet.
-4. `PASS`, the password of your faucet account.
+1. `mnemonic`, seed mnemonic of your faucet account.
+2. `lcd`, the address of your `terracli rest-server` node (probably don't have to change)
+3. `chain-id`, the chain id of the testnet.
 
-Change the default settings on the main directory's `env.json` file to set the relevant variables. Otherwise, just leave the variables alone, and it will connect to the most recent version of the Soju testnet. 
+Copy the default settings on the main directory's `env-example.json` file to `env.json` and set the relevant variables.  
 
 #### Build
 
 You need to have Golang and Yarn/Node.js installed on your system.
 
 ```
-go get $GOPATH/src/github.com/terra-project/faucet
+go get github.com/terra-project/faucet
 cd $GOPATH/src/github.com/terra-project/faucet
 dep ensure
 
