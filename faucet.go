@@ -333,33 +333,9 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 					{
 						"denom": "%v",
 						"amount": "%v"
-					},
-					{
-						"denom": "%v",
-						"amount": "%v"
-					},
-					{
-						"denom": "%v",
-						"amount": "%v"
-					},
-					{
-						"denom": "%v",
-						"amount": "%v"
-					},
-					{
-						"denom": "%v",
-						"amount": "%v"
-					},
-					{
-						"denom": "%v",
-						"amount": "%v"
-					},
-					{
-						"denom": "%v",
-						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "mluna", "10", MicroKRWDenom, amountTable[MicroKRWDenom], MicroUSDDenom, amountTable[MicroUSDDenom], MicroSDRDenom, amountTable[MicroSDRDenom], MicroCNYDenom, amountTable[MicroCNYDenom], MicroEURDenom, amountTable[MicroEURDenom], MicroGBPDenom, amountTable[MicroGBPDenom], MicroJPYDenom, amountTable[MicroJPYDenom]))
+			}`, address, "faucet", chain, sequence, "mluna", "10", claim.Denom, amount))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {
