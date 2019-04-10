@@ -42,13 +42,13 @@ var cdc *codec.Codec
 
 var amountTable = map[string]int{
 	MicroLunaDenom: 10 * MicroUnit,
-	MicroKRWDenom:  10000 * MicroUnit,
+	MicroKRWDenom:  10 * MicroUnit,
 	MicroUSDDenom:  10 * MicroUnit,
 	MicroSDRDenom:  10 * MicroUnit,
 	MicroGBPDenom:  10 * MicroUnit,
 	MicroEURDenom:  10 * MicroUnit,
-	MicroJPYDenom:  1000 * MicroUnit,
-	MicroCNYDenom:  100 * MicroUnit,
+	MicroJPYDenom:  10 * MicroUnit,
+	MicroCNYDenom:  10 * MicroUnit,
 }
 
 const (
@@ -383,6 +383,15 @@ func signAndBroadcast(txJSON []byte) string {
 	var stdTx auth.StdTx
 
 	cdc.MustUnmarshalJSON(txJSON, &stdTx)
+
+	// Sort denom
+	for _, msg := range stdTx.Msgs {
+		msg, ok := msg.(bank.MsgSend)
+		if ok {
+			msg.Amount.Sort()
+		}
+	}
+
 	signBytes := auth.StdSignBytes(chain, accountNumber, sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
 	sig, err := privKey.Sign(signBytes)
 	if err != nil {
