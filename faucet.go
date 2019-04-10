@@ -159,24 +159,7 @@ func main() {
 		fmt.Println("chain:", chain)
 		fmt.Println("lcd:", lcd)
 
-		// Query current faucet sequence
-		url := fmt.Sprintf("%v/auth/accounts/%v", lcd, address)
-		response, err := http.Get(url)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-
-		defer response.Body.Close()
-
-		body, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-
-		sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"(\d+)"`, string(body)), 10, 64)
-		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"(\d+)"`, string(body)), 10, 64)
+		sequence, accountNumber = loadAccountInfo()
 
 		http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 		http.HandleFunc("/claim", createGetCoinsHandler(db))
@@ -185,6 +168,28 @@ func main() {
 			log.Fatal("failed to start server", err)
 		}
 	}
+}
+
+func loadAccountInfo() (sequence uint64, accountNumber uint64) {
+	// Query current faucet sequence
+	url := fmt.Sprintf("%v/auth/accounts/%v", lcd, address)
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"(\d+)"`, string(body)), 10, 64)
+	accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"(\d+)"`, string(body)), 10, 64)
+	return
 }
 
 func parseRegexp(regexpStr string, target string) (data string) {
@@ -271,6 +276,11 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
+
+		sequenceChain, _ := loadAccountInfo()
+		if sequence < sequenceChain {
+			sequence = sequenceChain
+		}
 
 		var claim Claim
 
