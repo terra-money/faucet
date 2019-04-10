@@ -42,13 +42,13 @@ var cdc *codec.Codec
 
 var amountTable = map[string]int{
 	MicroLunaDenom: 10 * MicroUnit,
-	MicroKRWDenom:  10000 * MicroUnit,
-	MicroUSDDenom:  10000 * MicroUnit,
-	MicroSDRDenom:  10000 * MicroUnit,
-	MicroGBPDenom:  10000 * MicroUnit,
-	MicroEURDenom:  10000 * MicroUnit,
-	MicroJPYDenom:  10000 * MicroUnit,
-	MicroCNYDenom:  10000 * MicroUnit,
+	MicroKRWDenom:  10 * MicroUnit,
+	MicroUSDDenom:  10 * MicroUnit,
+	MicroSDRDenom:  10 * MicroUnit,
+	MicroGBPDenom:  10 * MicroUnit,
+	MicroEURDenom:  10 * MicroUnit,
+	MicroJPYDenom:  10 * MicroUnit,
+	MicroCNYDenom:  10 * MicroUnit,
 }
 
 const (
