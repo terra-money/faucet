@@ -43,12 +43,12 @@ var cdc *codec.Codec
 var amountTable = map[string]int{
 	MicroLunaDenom: 10 * MicroUnit,
 	MicroKRWDenom:  10000 * MicroUnit,
-	MicroUSDDenom:  10 * MicroUnit,
-	MicroSDRDenom:  10 * MicroUnit,
-	MicroGBPDenom:  10 * MicroUnit,
-	MicroEURDenom:  10 * MicroUnit,
-	MicroJPYDenom:  1000 * MicroUnit,
-	MicroCNYDenom:  100 * MicroUnit,
+	MicroUSDDenom:  10000 * MicroUnit,
+	MicroSDRDenom:  10000 * MicroUnit,
+	MicroGBPDenom:  10000 * MicroUnit,
+	MicroEURDenom:  10000 * MicroUnit,
+	MicroJPYDenom:  10000 * MicroUnit,
+	MicroCNYDenom:  10000 * MicroUnit,
 }
 
 const (
@@ -333,9 +333,33 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 					{
 						"denom": "%v",
 						"amount": "%v"
+					},
+					{
+						"denom": "%v",
+						"amount": "%v"
+					},
+					{
+						"denom": "%v",
+						"amount": "%v"
+					},
+					{
+						"denom": "%v",
+						"amount": "%v"
+					},
+					{
+						"denom": "%v",
+						"amount": "%v"
+					},
+					{
+						"denom": "%v",
+						"amount": "%v"
+					},
+					{
+						"denom": "%v",
+						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "mluna", "10", claim.Denom, amount))
+			}`, address, "faucet", chain, sequence, "mluna", "10", MicroKRWDenom, amountTable[MicroKRWDenom], MicroUSDDenom, amountTable[MicroUSDDenom], MicroSDRDenom, amountTable[MicroSDRDenom], MicroCNYDenom, amountTable[MicroCNYDenom], MicroEURDenom, amountTable[MicroEURDenom], MicroGBPDenom, amountTable[MicroGBPDenom], MicroJPYDenom, amountTable[MicroJPYDenom]))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {
@@ -383,6 +407,15 @@ func signAndBroadcast(txJSON []byte) string {
 	var stdTx auth.StdTx
 
 	cdc.MustUnmarshalJSON(txJSON, &stdTx)
+
+	// Sort denom
+	for _, msg := range stdTx.Msgs {
+		msg, ok := msg.(bank.MsgSend)
+		if ok {
+			msg.Amount.Sort()
+		}
+	}
+
 	signBytes := auth.StdSignBytes(chain, accountNumber, sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
 	sig, err := privKey.Sign(signBytes)
 	if err != nil {
