@@ -114,20 +114,18 @@ class HomeComponent extends React.Component {
                   <Field component="select" name="denom">
                     <option
                       value=""
-                      disabled="disabled"
                       selected="selected"
-                      hidden="hidden"
                     >
                       Select denom to receive...
                     </option>
                     <option value="mluna">Luna</option>
-                    <option value="mkrw">KRW</option>
-                    <option value="musd">USD</option>
-                    <option value="msdr">SDR</option>
-                    <option value="mgbp">GBP</option>
-                    <option value="meur">EUR</option>
-                    <option value="mjpy">JPY</option>
-                    <option value="mcny">CNY</option>
+                    <option value="mkrw">KRT</option>
+                    <option value="musd">UST</option>
+                    <option value="msdr">SDT</option>
+                    <option value="mgbp">GBT</option>
+                    <option value="meur">EUT</option>
+                    <option value="mjpy">JPT</option>
+                    <option value="mcny">CNT</option>
                   </Field>
                   {errors.denom && touched.denom ? (
                     <div className="fieldError selectFieldError">
