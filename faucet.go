@@ -248,7 +248,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 		// check interval limt
 		intervalSecs := now.Sub(requestLog.Requested).Seconds()
 		if intervalSecs < requestLimitSecs {
-			return errors.New"please wait a while for another tap")
+			return errors.New("please wait a while for another tap")
 		}
 
 		// reset log if date was changed
