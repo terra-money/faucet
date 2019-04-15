@@ -24,6 +24,19 @@ const sendSchema = Yup.object().shape({
   denom: Yup.string().required('Required')
 });
 
+const DENUMS_TO_TOKEN = {
+  mluna: 'Luna',
+  mkrw: 'KRT',
+  musd: 'UST',
+  msdr: 'SDT',
+  mgbp: 'GBT',
+  meur: 'EUT',
+  mjpy: 'JPT',
+  mcny: 'CNT'
+};
+
+const REQUEST_LIMIT_SECS = 30;
+
 class HomeComponent extends React.Component {
   constructor(props) {
     super(props);
@@ -63,6 +76,9 @@ class HomeComponent extends React.Component {
           </article>
           <div className="recaptcha">
             <Reaptcha
+              ref={el => {
+                this.captcha = el;
+              }}
               sitekey="6Ld4w4cUAAAAAJceMYGpOTpjiJtMS_xvzOg643ix"
               onVerify={this.onVerify}
             />
@@ -75,7 +91,17 @@ class HomeComponent extends React.Component {
             validationSchema={sendSchema}
             onSubmit={(values, { resetForm }) => {
               // same shape as initial values
-              this.setState({ sending: true });
+              this.setState({
+                sending: true,
+                verified: false
+              });
+
+              this.captcha.reset();
+
+              setTimeout(() => {
+                this.setState({ sending: false });
+              }, REQUEST_LIMIT_SECS * 1000);
+
               axios
                 .post('/claim', {
                   address: values.address,
@@ -85,19 +111,17 @@ class HomeComponent extends React.Component {
                 .then(response => {
                   const { amount } = response.data;
 
-                  this.setState({ sending: false });
                   toast.success(
-                    `Successfully Sent ${amount} tokens to ${values.address}`
+                    `Successfully Sent ${amount / 1000000} ${
+                      DENUMS_TO_TOKEN[values.denom]
+                    } to ${values.address}`
                   );
 
                   resetForm();
                 })
                 .catch(err => {
-                  this.setState({ sending: false });
                   toast.error(
-                    `Error Sending, An error occurred while trying to send: "${
-                      err.message
-                    }"`
+                    `An error occurred: "${err.response.data || err.message}"`
                   );
                 });
             }}
@@ -105,27 +129,28 @@ class HomeComponent extends React.Component {
             {({ errors, touched }) => (
               <Form className="inputContainer">
                 <div className="input">
-                  <Field name="address" placeholder="Testnet address" validate={bech32Validate} />
+                  <Field
+                    name="address"
+                    placeholder="Testnet address"
+                    validate={bech32Validate}
+                  />
                   {errors.address && touched.address ? (
                     <div className="fieldError">{errors.address}</div>
                   ) : null}
                 </div>
                 <div className="select">
                   <Field component="select" name="denom">
-                    <option
-                      value=""
-                      selected="selected"
-                    >
+                    <option value="" default>
                       Select denom to receive...
                     </option>
-                    <option value="mluna">Luna</option>
-                    <option value="mkrw">KRT</option>
-                    <option value="musd">UST</option>
-                    <option value="msdr">SDT</option>
-                    <option value="mgbp">GBT</option>
-                    <option value="meur">EUT</option>
-                    <option value="mjpy">JPT</option>
-                    <option value="mcny">CNT</option>
+                    <option value="mluna">{DENUMS_TO_TOKEN['mluna']}</option>
+                    <option value="mkrw">{DENUMS_TO_TOKEN['mkrw']}</option>
+                    <option value="musd">{DENUMS_TO_TOKEN['musd']}</option>
+                    <option value="msdr">{DENUMS_TO_TOKEN['msdr']}</option>
+                    <option value="mgbp">{DENUMS_TO_TOKEN['mgbp']}</option>
+                    <option value="meur">{DENUMS_TO_TOKEN['meur']}</option>
+                    <option value="mjpy">{DENUMS_TO_TOKEN['mjpy']}</option>
+                    <option value="mcny">{DENUMS_TO_TOKEN['mcny']}</option>
                   </Field>
                   {errors.denom && touched.denom ? (
                     <div className="fieldError selectFieldError">
@@ -138,11 +163,18 @@ class HomeComponent extends React.Component {
                 </div>
 
                 <div className="buttonContainer">
-                  <button disabled={!this.state.verified} type="submit">
+                  <button
+                    disabled={!this.state.verified || this.state.sending}
+                    type="submit"
+                  >
                     <i aria-hidden="true" className="material-icons">
                       send
                     </i>
-                    <span>Send me tokens</span>
+                    <span>
+                      {this.state.sending
+                        ? 'Waiting for next tap'
+                        : 'Send me tokens'}
+                    </span>
                   </button>
                 </div>
               </Form>

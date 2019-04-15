@@ -220,7 +220,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 	for idx, coin := range requestLog.Coins {
 		if coin.Denom == denom {
 			if (coin.Amount + amount) > amountTable[denom]*10 {
-				return errors.New("exceed denom limit")
+				return errors.New("amount limit exceeded")
 			}
 
 			requestLog.Coins[idx].Amount += amount
@@ -248,7 +248,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 		// check interval limt
 		intervalSecs := now.Sub(requestLog.Requested).Seconds()
 		if intervalSecs < requestLimitSecs {
-			return errors.New("too fast")
+			return errors.New"please wait a while for another tap")
 		}
 
 		// reset log if date was changed
@@ -374,7 +374,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, resJSON)
 		} else {
-			err := errors.New("Captcha Failed")
+			err := errors.New("captcha failed, please refresh page and try again")
 			panic(err)
 		}
 
