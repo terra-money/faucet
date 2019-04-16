@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	recaptcha "github.com/dpapathanasiou/go-recaptcha"
+	"github.com/dpapathanasiou/go-recaptcha"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/tendermint/tmlibs/bech32"
 	"github.com/tomasen/realip"
@@ -124,12 +124,12 @@ func main() {
 
 	lcd = os.Getenv(lcdVar)
 	if lcd == "" {
-		lcd = "http://localhost:1317"
+		lcd = "https://lcd.terra.money"
 	}
 
 	chain = os.Getenv(chainIDVar)
 	if chain == "" {
-		chain = "soju-0006"
+		chain = "soju-0007"
 	}
 
 	cdc = newCodec()
@@ -384,8 +384,8 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 // BroadcastReq defines a tx broadcasting request.
 type BroadcastReq struct {
-	Tx     auth.StdTx `json:"tx"`
-	Return string     `json:"return"`
+	Tx   auth.StdTx `json:"tx"`
+	Mode string     `json:"mode"`
 }
 
 func signAndBroadcast(txJSON []byte) string {
@@ -413,7 +413,7 @@ func signAndBroadcast(txJSON []byte) string {
 		Signature: sig}}
 	tx := auth.NewStdTx(stdTx.Msgs, stdTx.Fee, sigs, stdTx.Memo)
 	broadcastReq.Tx = tx
-	broadcastReq.Return = "async"
+	broadcastReq.Mode = "async"
 
 	bz := cdc.MustMarshalJSON(broadcastReq)
 
