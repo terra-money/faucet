@@ -25,14 +25,14 @@ const sendSchema = Yup.object().shape({
 });
 
 const DENUMS_TO_TOKEN = {
-  mluna: 'Luna',
-  mkrw: 'KRT',
-  musd: 'UST',
-  msdr: 'SDT',
-  mgbp: 'GBT',
-  meur: 'EUT',
-  mjpy: 'JPT',
-  mcny: 'CNT'
+  uluna: 'Luna',
+  ukrw: 'KRT',
+  uusd: 'UST',
+  usdr: 'SDT',
+  ugbp: 'GBT',
+  ueur: 'EUT',
+  ujpy: 'JPT',
+  ucny: 'CNT'
 };
 
 const REQUEST_LIMIT_SECS = 30;
@@ -143,14 +143,14 @@ class HomeComponent extends React.Component {
                     <option value="" default>
                       Select denom to receive...
                     </option>
-                    <option value="mluna">{DENUMS_TO_TOKEN['mluna']}</option>
-                    <option value="mkrw">{DENUMS_TO_TOKEN['mkrw']}</option>
-                    <option value="musd">{DENUMS_TO_TOKEN['musd']}</option>
-                    <option value="msdr">{DENUMS_TO_TOKEN['msdr']}</option>
-                    <option value="mgbp">{DENUMS_TO_TOKEN['mgbp']}</option>
-                    <option value="meur">{DENUMS_TO_TOKEN['meur']}</option>
-                    <option value="mjpy">{DENUMS_TO_TOKEN['mjpy']}</option>
-                    <option value="mcny">{DENUMS_TO_TOKEN['mcny']}</option>
+                    <option value="uluna">{DENUMS_TO_TOKEN['uluna']}</option>
+                    <option value="ukrw">{DENUMS_TO_TOKEN['ukrw']}</option>
+                    <option value="uusd">{DENUMS_TO_TOKEN['uusd']}</option>
+                    <option value="usdr">{DENUMS_TO_TOKEN['usdr']}</option>
+                    <option value="ugbp">{DENUMS_TO_TOKEN['ugbp']}</option>
+                    <option value="ueur">{DENUMS_TO_TOKEN['ueur']}</option>
+                    <option value="ujpy">{DENUMS_TO_TOKEN['ujpy']}</option>
+                    <option value="ucny">{DENUMS_TO_TOKEN['ucny']}</option>
                   </Field>
                   {errors.denom && touched.denom ? (
                     <div className="fieldError selectFieldError">

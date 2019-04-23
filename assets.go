@@ -1,14 +1,14 @@
 package main
 
 const (
-	MicroLunaDenom = "mluna"
-	MicroUSDDenom  = "musd"
-	MicroKRWDenom  = "mkrw"
-	MicroSDRDenom  = "msdr"
-	MicroCNYDenom  = "mcny"
-	MicroJPYDenom  = "mjpy"
-	MicroEURDenom  = "meur"
-	MicroGBPDenom  = "mgbp"
+	MicroLunaDenom = "uluna"
+	MicroUSDDenom  = "uusd"
+	MicroKRWDenom  = "ukrw"
+	MicroSDRDenom  = "usdr"
+	MicroCNYDenom  = "ucny"
+	MicroJPYDenom  = "ujpy"
+	MicroEURDenom  = "ueur"
+	MicroGBPDenom  = "ugbp"
 
 	MicroUnit = 1e6
 )

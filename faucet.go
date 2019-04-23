@@ -345,7 +345,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "mluna", "10", claim.Denom, amount))
+			}`, address, "faucet", chain, sequence, "uluna", "10", claim.Denom, amount))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {
