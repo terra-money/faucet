@@ -324,7 +324,11 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-			amount := amountTable[claim.Denom]
+			amount, ok := amountTable[claim.Denom]
+			if !ok {
+				panic(fmt.Errorf("Invalid Denom; %v", claim.Denom))
+			}
+
 			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcd, encodedAddress)
 			data := strings.TrimSpace(fmt.Sprintf(`{
 				"base_req": {
