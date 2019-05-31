@@ -20,8 +20,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
 # staging
 FROM alpine:latest
+RUN apk add --update ca-certificates
 WORKDIR /app
-COPY --from=node-builder /app/frontend/build /app/frontend/dist/
+COPY --from=node-builder /app/frontend/build /app/frontend/build/
 COPY --from=go-builder /app/faucet /app/
 
 EXPOSE 3000

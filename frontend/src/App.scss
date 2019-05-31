@@ -211,6 +211,35 @@ section {
   }
 }
 
+.Toastify__toast-container--top-right {
+  top: 15px !important;
+  right: 15px !important;
+  width: 360px !important;
+}
+
+.Toastify__toast {
+  word-break: break-word !important;
+  font-family: inherit !important;
+  padding: 15px !important;
+  border-radius: 5px !important;
+  font-size: 15px !important;
+  letter-spacing: 0 !important;
+  line-height: 20px !important;
+}
+
+.Toastify__toast--info {
+  background: #5493f7 !important;
+}
+.Toastify__toast--success {
+  background: #1daa8e !important;
+}
+.Toastify__toast--warning {
+  background: #fd9a02 !important;
+}
+.Toastify__toast--error {
+  background: #ff5561 !important;
+}
+
 @media screen and (min-width: 360px) {
   section {
     border-radius: 5px;
