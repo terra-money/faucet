@@ -346,7 +346,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 						}
 					]
 				},
-				"amount": [
+				"coins": [
 					{
 						"denom": "%v",
 						"amount": "%v"
@@ -420,7 +420,7 @@ func signAndBroadcast(txJSON []byte) string {
 		Signature: sig}}
 	tx := auth.NewStdTx(stdTx.Msgs, stdTx.Fee, sigs, stdTx.Memo)
 	broadcastReq.Tx = tx
-	broadcastReq.Mode = "async"
+	broadcastReq.Mode = "block"
 
 	bz := cdc.MustMarshalJSON(broadcastReq)
 
