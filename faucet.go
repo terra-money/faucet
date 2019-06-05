@@ -26,6 +26,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bip39 "github.com/cosmos/go-bip39"
+	"github.com/terra-project/core/x/pay"
 
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -83,8 +84,10 @@ func newCodec() *codec.Codec {
 	cdc := codec.New()
 	sdk.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
-	bank.RegisterCodec(cdc)
+	pay.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
+
+	bank.SetMsgCodec(cdc)
 
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("terra", "terrapub")
