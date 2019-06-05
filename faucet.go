@@ -129,7 +129,7 @@ func main() {
 
 	chain = os.Getenv(chainIDVar)
 	if chain == "" {
-		chain = "soju-0007"
+		chain = "soju-0009"
 	}
 
 	cdc = newCodec()
