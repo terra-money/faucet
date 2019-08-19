@@ -4,7 +4,7 @@
   "alias": "faucet.terra.money",
   "build": {
     "env": {
-      "REACT_APP_API_HOST": "faucet-api.chai.finance"
+      "REACT_APP_API_HOST": "faucet-api.terra.money"
     }
   },
   "builds": [
@@ -23,6 +23,5 @@
     { "src": "/precache-manifest.(.*)", "dest": "/frontend/precache-manifest.$1" },
     { "src": "/service-worker.js", "headers": { "cache-control": "s-maxage=0" }, "dest": "/frontend/service-worker.js" },
     { "src": "/(.*)", "headers": { "cache-control": "s-maxage=0" }, "dest": "/frontend/index.html" }
-  ],
-  "regions": ["sfo1", "hnd1", "bru1"]
+  ]
 }
