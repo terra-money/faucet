@@ -46,10 +46,6 @@ var amountTable = map[string]int{
 	MicroKRWDenom:  10 * MicroUnit,
 	MicroUSDDenom:  10 * MicroUnit,
 	MicroSDRDenom:  10 * MicroUnit,
-	MicroGBPDenom:  10 * MicroUnit,
-	MicroEURDenom:  10 * MicroUnit,
-	MicroJPYDenom:  10 * MicroUnit,
-	MicroCNYDenom:  10 * MicroUnit,
 }
 
 const (
@@ -300,6 +296,11 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			panic(decoderErr)
 		}
 
+		amount, ok := amountTable[claim.Denom]
+		if !ok {
+			panic(fmt.Errorf("Invalid Denom; %v", claim.Denom))
+		}
+
 		// make sure address is bech32
 		readableAddress, decodedAddress, decodeErr := bech32.DecodeAndConvert(claim.Address)
 		if decodeErr != nil {
@@ -327,11 +328,6 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-			amount, ok := amountTable[claim.Denom]
-			if !ok {
-				panic(fmt.Errorf("Invalid Denom; %v", claim.Denom))
-			}
-
 			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcd, encodedAddress)
 			data := strings.TrimSpace(fmt.Sprintf(`{
 				"base_req": {
@@ -352,7 +348,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "uluna", "10", claim.Denom, amount))
+			}`, address, "faucet", chain, sequence, "ukrw", "3000", claim.Denom, amount))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {

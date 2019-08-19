@@ -3,7 +3,6 @@ Dockerfile
 Gopkg.lock
 Gopkg.toml
 README.md
-assets.go
 env.json
 faucet.go
 terra-faucet.png
