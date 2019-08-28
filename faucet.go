@@ -26,7 +26,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bip39 "github.com/cosmos/go-bip39"
-	"github.com/terra-project/core/x/pay"
+
+	"github.com/terra-project/core/app"
+	core "github.com/terra-project/core/types"
 
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -41,11 +43,11 @@ var sequence uint64
 var accountNumber uint64
 var cdc *codec.Codec
 
-var amountTable = map[string]int{
-	MicroLunaDenom: 10 * MicroUnit,
-	MicroKRWDenom:  10 * MicroUnit,
-	MicroUSDDenom:  10 * MicroUnit,
-	MicroSDRDenom:  10 * MicroUnit,
+var amountTable = map[string]int64{
+	core.MicroLunaDenom: 10 * core.MicroUnit,
+	core.MicroKRWDenom:  10 * core.MicroUnit,
+	core.MicroUSDDenom:  10 * core.MicroUnit,
+	core.MicroSDRDenom:  10 * core.MicroUnit,
 }
 
 const (
@@ -66,7 +68,7 @@ type Claim struct {
 // Coin is the same as sdk.Coin
 type Coin struct {
 	Denom  string `json:"denom"`
-	Amount int    `json:"amount"`
+	Amount int64  `json:"amount"`
 }
 
 // Env wraps env variables stored in env.json
@@ -77,16 +79,15 @@ type Env struct {
 }
 
 func newCodec() *codec.Codec {
-	cdc := codec.New()
-	sdk.RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
-	pay.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-
-	bank.SetMsgCodec(cdc)
+	cdc := app.MakeCodec()
 
 	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount("terra", "terrapub")
+	config.SetCoinType(core.CoinType)
+	config.SetFullFundraiserPath(core.FullFundraiserPath)
+	config.SetBech32PrefixForAccount(core.Bech32PrefixAccAddr, core.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(core.Bech32PrefixValAddr, core.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(core.Bech32PrefixConsAddr, core.Bech32PrefixConsPub)
+	config.Seal()
 
 	return cdc
 }
@@ -135,7 +136,7 @@ func main() {
 
 	seed := bip39.NewSeed(mnemonic, "")
 	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
-	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, hd.FullFundraiserPath)
+	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, core.FullFundraiserPath)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -335,10 +336,12 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 					"memo": "%v",
 					"chain_id": "%v",
 					"sequence": "%v",
-					"fees": [
+					"gas": "auto",
+					"gas_adjustment": "1.4",
+					"gas_prices": [
 						{
-							"denom": "%v",
-							"amount": "%v"
+							"denom": "ukrw",
+							"amount": "0.015"
 						}
 					]
 				},
@@ -348,7 +351,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "ukrw", "3000", claim.Denom, amount))
+			}`, address, "faucet", chain, sequence, claim.Denom, amount))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {
