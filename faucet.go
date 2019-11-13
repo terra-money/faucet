@@ -124,12 +124,12 @@ func main() {
 
 	lcd = os.Getenv(lcdVar)
 	if lcd == "" {
-		lcd = "https://lcd.terra.money"
+		lcd = "https://lcd.terra.dev"
 	}
 
 	chain = os.Getenv(chainIDVar)
 	if chain == "" {
-		chain = "soju-0009"
+		chain = "vodka"
 	}
 
 	cdc = newCodec()
