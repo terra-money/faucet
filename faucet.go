@@ -136,7 +136,8 @@ func main() {
 
 	seed := bip39.NewSeed(mnemonic, "")
 	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
-	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, hd.FullFundraiserPath)
+	// TODO: Change 330 to hd.FullFundraiserPath in col-3
+	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, "44'/118'/0'/0/0")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
