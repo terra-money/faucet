@@ -157,6 +157,7 @@ func main() {
 	} else {
 		recaptcha.Init(os.Args[1])
 
+		fmt.Println("2019-11-13 #1")
 		fmt.Println("chain:", chain)
 		fmt.Println("lcd:", lcd)
 
