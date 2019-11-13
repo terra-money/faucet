@@ -41,11 +41,14 @@ var sequence uint64
 var accountNumber uint64
 var cdc *codec.Codec
 
+// MicroUnit nolint
+const MicroUnit = 1000000
+
 var amountTable = map[string]int{
-	MicroLunaDenom: 10 * MicroUnit,
-	MicroKRWDenom:  10 * MicroUnit,
-	MicroUSDDenom:  10 * MicroUnit,
-	MicroSDRDenom:  10 * MicroUnit,
+	"MicroLunaDenom": 10 * MicroUnit,
+	"MicroKRWDenom":  10 * MicroUnit,
+	"MicroUSDDenom":  10 * MicroUnit,
+	"MicroSDRDenom":  10 * MicroUnit,
 }
 
 const (
@@ -148,6 +151,8 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
+
+	fmt.Println(address)
 
 	if len(os.Args) != 2 {
 		fmt.Printf("usage: %s <reCaptcha private key>\n", filepath.Base(os.Args[0]))
