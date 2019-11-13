@@ -26,6 +26,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bip39 "github.com/cosmos/go-bip39"
+	"github.com/terra-project/core/types/assets"
 	"github.com/terra-project/core/x/pay"
 
 	"github.com/tendermint/tendermint/crypto"
@@ -41,11 +42,11 @@ var sequence uint64
 var accountNumber uint64
 var cdc *codec.Codec
 
-var amountTable = map[string]int{
-	MicroLunaDenom: 10 * MicroUnit,
-	MicroKRWDenom:  10 * MicroUnit,
-	MicroUSDDenom:  10 * MicroUnit,
-	MicroSDRDenom:  10 * MicroUnit,
+var amountTable = map[string]int64{
+	assets.MicroLunaDenom: 10 * assets.MicroUnit,
+	assets.MicroKRWDenom:  10 * assets.MicroUnit,
+	assets.MicroUSDDenom:  10 * assets.MicroUnit,
+	assets.MicroSDRDenom:  10 * assets.MicroUnit,
 }
 
 const (
@@ -66,7 +67,7 @@ type Claim struct {
 // Coin is the same as sdk.Coin
 type Coin struct {
 	Denom  string `json:"denom"`
-	Amount int    `json:"amount"`
+	Amount int64  `json:"amount"`
 }
 
 // Env wraps env variables stored in env.json
