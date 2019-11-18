@@ -8,7 +8,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20190318030020-c3a204f8e965
 	github.com/tendermint/tendermint v0.32.7
 	github.com/tendermint/tmlibs v0.0.0-20180607034639-640af0205d98
-	github.com/terra-project/core v0.2.3-0.20191112083126-157d778b57ad
+	github.com/terra-project/core v0.3.0-rc0
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	golang.org/x/crypto v0.0.0-20190411191339-88737f569e3a // indirect
 )
