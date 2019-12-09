@@ -27,6 +27,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bip39 "github.com/cosmos/go-bip39"
 
+
 	"github.com/terra-project/core/app"
 	core "github.com/terra-project/core/types"
 
@@ -44,6 +45,7 @@ var accountNumber uint64
 var cdc *codec.Codec
 
 var amountTable = map[string]int64{
+
 	core.MicroLunaDenom: 10 * core.MicroUnit,
 	core.MicroKRWDenom:  10 * core.MicroUnit,
 	core.MicroUSDDenom:  10 * core.MicroUnit,
@@ -124,12 +126,12 @@ func main() {
 
 	lcd = os.Getenv(lcdVar)
 	if lcd == "" {
-		lcd = "https://lcd.terra.money"
+		lcd = "https://lcd.terra.dev"
 	}
 
 	chain = os.Getenv(chainIDVar)
 	if chain == "" {
-		chain = "soju-0009"
+		chain = "vodka"
 	}
 
 	cdc = newCodec()
@@ -156,6 +158,7 @@ func main() {
 	} else {
 		recaptcha.Init(os.Args[1])
 
+		fmt.Println("2019-11-13 #1")
 		fmt.Println("chain:", chain)
 		fmt.Println("lcd:", lcd)
 
