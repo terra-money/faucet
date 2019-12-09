@@ -26,8 +26,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bip39 "github.com/cosmos/go-bip39"
-	"github.com/terra-project/core/types/assets"
-	"github.com/terra-project/core/x/pay"
+
+
+	"github.com/terra-project/core/app"
+	core "github.com/terra-project/core/types"
 
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -43,10 +45,11 @@ var accountNumber uint64
 var cdc *codec.Codec
 
 var amountTable = map[string]int64{
-	assets.MicroLunaDenom: 10 * assets.MicroUnit,
-	assets.MicroKRWDenom:  10 * assets.MicroUnit,
-	assets.MicroUSDDenom:  10 * assets.MicroUnit,
-	assets.MicroSDRDenom:  10 * assets.MicroUnit,
+
+	core.MicroLunaDenom: 10 * core.MicroUnit,
+	core.MicroKRWDenom:  10 * core.MicroUnit,
+	core.MicroUSDDenom:  10 * core.MicroUnit,
+	core.MicroSDRDenom:  10 * core.MicroUnit,
 }
 
 const (
@@ -78,16 +81,15 @@ type Env struct {
 }
 
 func newCodec() *codec.Codec {
-	cdc := codec.New()
-	sdk.RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
-	pay.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-
-	bank.SetMsgCodec(cdc)
+	cdc := app.MakeCodec()
 
 	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount("terra", "terrapub")
+	config.SetCoinType(core.CoinType)
+	config.SetFullFundraiserPath(core.FullFundraiserPath)
+	config.SetBech32PrefixForAccount(core.Bech32PrefixAccAddr, core.Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(core.Bech32PrefixValAddr, core.Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(core.Bech32PrefixConsAddr, core.Bech32PrefixConsPub)
+	config.Seal()
 
 	return cdc
 }
@@ -136,8 +138,7 @@ func main() {
 
 	seed := bip39.NewSeed(mnemonic, "")
 	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
-	// TODO: Change 330 to hd.FullFundraiserPath in col-3
-	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, "44'/118'/0'/0/0")
+	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, core.FullFundraiserPath)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -338,10 +339,12 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 					"memo": "%v",
 					"chain_id": "%v",
 					"sequence": "%v",
-					"fees": [
+					"gas": "auto",
+					"gas_adjustment": "1.4",
+					"gas_prices": [
 						{
-							"denom": "%v",
-							"amount": "%v"
+							"denom": "ukrw",
+							"amount": "0.015"
 						}
 					]
 				},
@@ -351,7 +354,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "ukrw", "3000", claim.Denom, amount))
+			}`, address, "faucet", chain, sequence, claim.Denom, amount))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {
