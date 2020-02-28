@@ -30,7 +30,8 @@ const DENUMS_TO_TOKEN = {
   uluna: 'Luna',
   ukrw: 'KRT',
   uusd: 'UST',
-  usdr: 'SDT'
+  usdr: 'SDT',
+  umnt: 'MNT'
 };
 
 const REQUEST_LIMIT_SECS = 30;
@@ -151,6 +152,7 @@ class HomeComponent extends React.Component {
                     <option value="ukrw">{DENUMS_TO_TOKEN['ukrw']}</option>
                     <option value="uusd">{DENUMS_TO_TOKEN['uusd']}</option>
                     <option value="usdr">{DENUMS_TO_TOKEN['usdr']}</option>
+                    <option value="umnt">{DENUMS_TO_TOKEN['umnt']}</option>
                   </Field>
                   {errors.denom && touched.denom ? (
                     <div className="fieldError selectFieldError">
