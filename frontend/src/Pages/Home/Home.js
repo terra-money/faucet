@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 // import cx from "classnames";
 import Reaptcha from 'reaptcha';
 import axios from 'axios';
@@ -6,10 +6,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import b32 from '../../scripts/b32';
+import networksConfig from '../../config/networks';
 
 import 'react-toastify/dist/ReactToastify.css';
 
 import '../../App.scss';
+import NetworkContext from '../../contexts/NetworkContext';
 
 const bech32Validate = param => {
   try {
@@ -34,6 +36,8 @@ const DENUMS_TO_TOKEN = {
 const REQUEST_LIMIT_SECS = 30;
 
 class HomeComponent extends React.Component {
+  static contextType = NetworkContext;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -86,6 +90,8 @@ class HomeComponent extends React.Component {
             }}
             validationSchema={sendSchema}
             onSubmit={(values, { resetForm }) => {
+              const network = this.context.network;
+              const item = networksConfig.filter(n => n.key === network)[0];
               // same shape as initial values
               this.setState({
                 sending: true,
@@ -100,6 +106,8 @@ class HomeComponent extends React.Component {
 
               axios
                 .post('/claim', {
+                  chain_id: network,
+                  lcd_url: item.lcd,
                   address: values.address,
                   denom: values.denom,
                   response: this.state.response
