@@ -33,8 +33,8 @@ import (
 )
 
 var mnemonic string
-var lcd string
-var chain string
+var lcdUrl string
+var chainID string
 var privKey crypto.PrivKey
 var address string
 var sequence uint64
@@ -53,17 +53,16 @@ var amountTable = map[string]int{
 
 const (
 	requestLimitSecs = 30
-
 	mnemonicVar = "mnemonic"
-	lcdVar      = "lcd"
-	chainIDVar  = "chain-id"
 )
 
 // Claim wraps a faucet claim
 type Claim struct {
-	Address  string
-	Response string
-	Denom    string
+    ChainID  string `json:"chain_id"`
+    LcdUrl   string `json:"lcd_url"`
+	Address  string `json:"address"`
+	Response string `json:"response"`
+	Denom    string `json:"denom"`
 }
 
 // Coin is the same as sdk.Coin
@@ -75,8 +74,6 @@ type Coin struct {
 // Env wraps env variables stored in env.json
 type Env struct {
 	Mnemonic string `json:"mnemonic"`
-	Lcd      string `json:"lcd"`
-	Chain    string `json:"chain-id"`
 }
 
 func newCodec() *codec.Codec {
@@ -107,8 +104,6 @@ func readEnvFile() {
 	}
 
 	os.Setenv(mnemonicVar, env.Mnemonic)
-	os.Setenv(lcdVar, env.Lcd)
-	os.Setenv(chainIDVar, env.Chain)
 }
 
 func main() {
@@ -122,16 +117,6 @@ func main() {
 	mnemonic = os.Getenv(mnemonicVar)
 	if mnemonic == "" {
 		mnemonic = "faucet"
-	}
-
-	lcd = os.Getenv(lcdVar)
-	if lcd == "" {
-		lcd = "https://lcd.terra.money"
-	}
-
-	chain = os.Getenv(chainIDVar)
-	if chain == "" {
-		chain = "soju-0009"
 	}
 
 	cdc = newCodec()
@@ -160,11 +145,6 @@ func main() {
 	} else {
 		recaptcha.Init(os.Args[1])
 
-		fmt.Println("chain:", chain)
-		fmt.Println("lcd:", lcd)
-
-		sequence, accountNumber = loadAccountInfo()
-
 		http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 		http.HandleFunc("/claim", createGetCoinsHandler(db))
 
@@ -176,7 +156,7 @@ func main() {
 
 func loadAccountInfo() (sequence uint64, accountNumber uint64) {
 	// Query current faucet sequence
-	url := fmt.Sprintf("%v/auth/accounts/%v", lcd, address)
+	url := fmt.Sprintf("%v/auth/accounts/%v", lcdUrl, address)
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -281,25 +261,31 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
 
-		sequenceChain, _ := loadAccountInfo()
-		if sequence < sequenceChain {
-			sequence = sequenceChain
-		}
-
-		var claim Claim
-
 		defer func() {
 			if err := recover(); err != nil {
 				http.Error(w, err.(error).Error(), 400)
 			}
 		}()
 
+		var claim Claim
 		// decode JSON response from front end
 		decoder := json.NewDecoder(request.Body)
 		decoderErr := decoder.Decode(&claim)
 		if decoderErr != nil {
 			panic(decoderErr)
 		}
+
+		chainID = claim.ChainID
+        lcdUrl = claim.LcdUrl
+
+		sequenceChain, accNum := loadAccountInfo()
+        if sequence < sequenceChain {
+            sequence = sequenceChain
+        }
+
+        accountNumber = accNum
+
+        fmt.Println(chainID, lcdUrl)
 
 		amount, ok := amountTable[claim.Denom]
 		if !ok {
@@ -333,7 +319,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcd, encodedAddress)
+			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdUrl, encodedAddress)
 			data := strings.TrimSpace(fmt.Sprintf(`{
 				"base_req": {
 					"from": "%v",
@@ -353,7 +339,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 						"amount": "%v"
 					}
 				]
-			}`, address, "faucet", chain, sequence, "ukrw", "3000", claim.Denom, amount))
+			}`, address, "faucet", chainID, sequence, "ukrw", "3000", claim.Denom, amount))
 
 			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
 			if err != nil {
@@ -410,7 +396,7 @@ func signAndBroadcast(txJSON []byte) string {
 		}
 	}
 
-	signBytes := auth.StdSignBytes(chain, accountNumber, sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
+	signBytes := auth.StdSignBytes(chainID, accountNumber, sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
 	sig, err := privKey.Sign(signBytes)
 	if err != nil {
 		panic(err)
@@ -425,7 +411,7 @@ func signAndBroadcast(txJSON []byte) string {
 
 	bz := cdc.MustMarshalJSON(broadcastReq)
 
-	url := fmt.Sprintf("%v/txs", lcd)
+	url := fmt.Sprintf("%v/txs", lcdUrl)
 	response, err := http.Post(url, "application/json", bytes.NewReader(bz))
 	if err != nil {
 		panic(err)
