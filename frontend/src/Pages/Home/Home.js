@@ -197,7 +197,7 @@ class HomeComponent extends React.Component {
               </i>
               <span>
                 <a
-                  href="https://github.com/terra-project/core/blob/develop/docs/guide/join-network.md"
+                  href="https://jigu.terra.money"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
