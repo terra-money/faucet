@@ -1,6 +1,6 @@
 export default [
   {
-    key: 'soju-0013',
+    key: 'soju-0014',
     lcd: 'https://soju-fcd.terra.dev'
   },
   {
