@@ -1,0 +1,25 @@
+FROM node:lts-alpine as builder
+
+WORKDIR /app
+
+COPY frontend/package.json .
+COPY frontend/yarn.lock .
+
+RUN yarn install
+
+COPY frontend .
+
+RUN yarn run build
+
+
+FROM node:lts-alpine
+
+WORKDIR /app
+
+RUN yarn global add serve
+
+COPY --from=builder /app/build /app
+
+EXPOSE 5000
+
+ENTRYPOINT ["serve"]
