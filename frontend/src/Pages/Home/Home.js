@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 // import cx from "classnames";
 import Reaptcha from 'reaptcha';
 import axios from 'axios';
@@ -13,7 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../App.scss';
 import NetworkContext from '../../contexts/NetworkContext';
 
-const bech32Validate = param => {
+const bech32Validate = (param) => {
   try {
     b32.decode(param);
   } catch (error) {
@@ -23,7 +23,7 @@ const bech32Validate = param => {
 
 const sendSchema = Yup.object().shape({
   address: Yup.string().required('Required'),
-  denom: Yup.string().required('Required')
+  denom: Yup.string().required('Required'),
 });
 
 const DENUMS_TO_TOKEN = {
@@ -31,7 +31,7 @@ const DENUMS_TO_TOKEN = {
   ukrw: 'KRT',
   uusd: 'UST',
   usdr: 'SDT',
-  umnt: 'MNT'
+  umnt: 'MNT',
 };
 
 const REQUEST_LIMIT_SECS = 30;
@@ -44,14 +44,14 @@ class HomeComponent extends React.Component {
     this.state = {
       sending: false,
       verified: false,
-      response: ''
+      response: '',
     };
   }
 
-  onVerify = response => {
+  onVerify = (response) => {
     this.setState({
       response,
-      verified: true
+      verified: true,
     });
   };
 
@@ -77,7 +77,7 @@ class HomeComponent extends React.Component {
           </article>
           <div className="recaptcha">
             <Reaptcha
-              ref={el => {
+              ref={(el) => {
                 this.captcha = el;
               }}
               sitekey="6Ld4w4cUAAAAAJceMYGpOTpjiJtMS_xvzOg643ix"
@@ -87,16 +87,16 @@ class HomeComponent extends React.Component {
           <Formik
             initialValues={{
               address: '',
-              denom: ''
+              denom: '',
             }}
             validationSchema={sendSchema}
             onSubmit={(values, { resetForm }) => {
               const network = this.context.network;
-              const item = networksConfig.filter(n => n.key === network)[0];
+              const item = networksConfig.filter((n) => n.key === network)[0];
               // same shape as initial values
               this.setState({
                 sending: true,
-                verified: false
+                verified: false,
               });
 
               this.captcha.reset();
@@ -111,9 +111,9 @@ class HomeComponent extends React.Component {
                   lcd_url: item.lcd,
                   address: values.address,
                   denom: values.denom,
-                  response: this.state.response
+                  response: this.state.response,
                 })
-                .then(response => {
+                .then((response) => {
                   const { amount } = response.data;
 
                   toast.success(
@@ -124,7 +124,7 @@ class HomeComponent extends React.Component {
 
                   resetForm();
                 })
-                .catch(err => {
+                .catch((err) => {
                   toast.error(
                     `An error occurred: "${err.response.data || err.message}"`
                   );

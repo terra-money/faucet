@@ -4,7 +4,7 @@ import s from './SelectNetworks.module.scss';
 import networksConfig from '../config/networks';
 import NetworkContext from '../contexts/NetworkContext';
 
-const SelectNetworks = props => {
+const SelectNetworks = (props) => {
   const { network, setNetwork } = useContext(NetworkContext);
 
   return (
@@ -12,7 +12,7 @@ const SelectNetworks = props => {
       <select
         className={s.select}
         value={network}
-        onChange={e => setNetwork(e.target.value)}
+        onChange={(e) => setNetwork(e.target.value)}
       >
         {networksConfig.map(({ key }, index) => {
           return <option key={index}>{key}</option>;

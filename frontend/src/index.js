@@ -5,17 +5,17 @@ import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import NetworkContext from './contexts/NetworkContext';
+import networks from './config/networks';
 
 class Root extends Component {
-  setNetwork = network => {
+  setNetwork = (network) => {
     this.setState({
-      network: network
+      network: network,
     });
   };
   state = {
-    network:
-      window.location.pathname.split('/')[1] || process.env.REACT_APP_CHAIN_ID,
-    setNetwork: this.setNetwork
+    network: networks[0].key,
+    setNetwork: this.setNetwork,
   };
 
   render() {
