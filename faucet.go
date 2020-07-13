@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -27,7 +26,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bip39 "github.com/cosmos/go-bip39"
 
-
 	"github.com/terra-project/core/app"
 	core "github.com/terra-project/core/types"
 
@@ -36,7 +34,8 @@ import (
 )
 
 var mnemonic string
-var lcdUrl string
+var recaptchaKey string
+var lcdURL string
 var chainID string
 var privKey crypto.PrivKey
 var address string
@@ -54,13 +53,14 @@ var amountTable = map[string]int64{
 
 const (
 	requestLimitSecs = 30
-	mnemonicVar = "mnemonic"
+	mnemonicVar      = "MNEMONIC"
+	recaptchaKeyVar  = "RECAPTCHA_KEY"
 )
 
 // Claim wraps a faucet claim
 type Claim struct {
-    ChainID  string `json:"chain_id"`
-    LcdUrl   string `json:"lcd_url"`
+	ChainID  string `json:"chain_id"`
+	LcdURL   string `json:"lcd_url"`
 	Address  string `json:"address"`
 	Response string `json:"response"`
 	Denom    string `json:"denom"`
@@ -70,11 +70,6 @@ type Claim struct {
 type Coin struct {
 	Denom  string `json:"denom"`
 	Amount int64  `json:"amount"`
-}
-
-// Env wraps env variables stored in env.json
-type Env struct {
-	Mnemonic string `json:"mnemonic"`
 }
 
 func newCodec() *codec.Codec {
@@ -91,21 +86,6 @@ func newCodec() *codec.Codec {
 	return cdc
 }
 
-func readEnvFile() {
-	data, err := ioutil.ReadFile("./env.json")
-	if err != nil {
-		fmt.Print(err)
-	}
-
-	var env Env
-	err = json.Unmarshal(data, &env)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	os.Setenv(mnemonicVar, env.Mnemonic)
-}
-
 func main() {
 	db, err := leveldb.OpenFile("db/ipdb", nil)
 	if err != nil {
@@ -113,10 +93,16 @@ func main() {
 	}
 	defer db.Close()
 
-	readEnvFile()
 	mnemonic = os.Getenv(mnemonicVar)
+
 	if mnemonic == "" {
-		mnemonic = "faucet"
+		panic("MNEMONIC variable is required")
+	}
+
+	recaptchaKey = os.Getenv(recaptchaKeyVar)
+
+	if recaptchaKey == "" {
+		panic("RECAPTCHA_KEY variable is required")
 	}
 
 	cdc = newCodec()
@@ -139,24 +125,19 @@ func main() {
 
 	fmt.Println(address)
 
-	if len(os.Args) != 2 {
-		fmt.Printf("usage: %s <reCaptcha private key>\n", filepath.Base(os.Args[0]))
-		os.Exit(1)
-	} else {
-		recaptcha.Init(os.Args[1])
+	recaptcha.Init(recaptchaKey)
 
-		http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
-		http.HandleFunc("/claim", createGetCoinsHandler(db))
+	http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
+	http.HandleFunc("/claim", createGetCoinsHandler(db))
 
-		if err := http.ListenAndServe(":3000", nil); err != nil {
-			log.Fatal("failed to start server", err)
-		}
+	if err := http.ListenAndServe(":3000", nil); err != nil {
+		log.Fatal("failed to start server", err)
 	}
 }
 
 func loadAccountInfo() {
 	// Query current faucet sequence
-	url := fmt.Sprintf("%v/auth/accounts/%v", lcdUrl, address)
+	url := fmt.Sprintf("%v/auth/accounts/%v", lcdURL, address)
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -276,7 +257,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		}
 
 		chainID = claim.ChainID
-        lcdUrl = claim.LcdUrl
+		lcdURL = claim.LcdURL
 
 		loadAccountInfo()
 
@@ -312,7 +293,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdUrl, encodedAddress)
+			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdURL, encodedAddress)
 			data := strings.TrimSpace(fmt.Sprintf(`{
 				"base_req": {
 					"from": "%v",
@@ -407,7 +388,7 @@ func signAndBroadcast(txJSON []byte) string {
 
 	bz := cdc.MustMarshalJSON(broadcastReq)
 
-	url := fmt.Sprintf("%v/txs", lcdUrl)
+	url := fmt.Sprintf("%v/txs", lcdURL)
 	response, err := http.Post(url, "application/json", bytes.NewReader(bz))
 	if err != nil {
 		panic(err)
