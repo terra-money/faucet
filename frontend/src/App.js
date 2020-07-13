@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Route from './route';
 import './App.scss';
+import SelectNetworks from './components/SelectNetworks';
 
 class App extends Component {
   showCurrentYear() {
@@ -11,7 +12,7 @@ class App extends Component {
     return (
       <Router>
         <header>
-          testnet: <span>{process.env.REACT_APP_CHAIN_ID}</span>
+          <SelectNetworks className="network_select" />
         </header>
         <Route />
         <footer>
