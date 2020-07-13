@@ -1,9 +1,0 @@
-faucet.terra.money {
-    gzip
-    proxy / localhost:8080 {
-        transparent
-    }
-    ratelimit * /claim 1 1 day
-}
-
-
