@@ -35,7 +35,7 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /app
 
 COPY --from=go-builder /app/faucet /app/
-COPY --from=node-builder /app/build /app/frontent/build
+COPY --from=node-builder /app/build /app/frontend/build
 
 EXPOSE 3000
 
