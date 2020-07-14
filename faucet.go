@@ -35,6 +35,7 @@ import (
 
 var mnemonic string
 var recaptchaKey string
+var port string
 var lcdURL string
 var chainID string
 var privKey crypto.PrivKey
@@ -55,6 +56,7 @@ const (
 	requestLimitSecs = 30
 	mnemonicVar      = "MNEMONIC"
 	recaptchaKeyVar  = "RECAPTCHA_KEY"
+	portVar          = "PORT"
 )
 
 // Claim wraps a faucet claim
@@ -105,6 +107,11 @@ func main() {
 		panic("RECAPTCHA_KEY variable is required")
 	}
 
+	port = os.Getenv(portVar)
+	if port == "" {
+		port = "3000"
+	}
+
 	cdc = newCodec()
 
 	seed := bip39.NewSeed(mnemonic, "")
@@ -130,7 +137,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 	http.HandleFunc("/claim", createGetCoinsHandler(db))
 
-	if err := http.ListenAndServe(":3000", nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		log.Fatal("failed to start server", err)
 	}
 }

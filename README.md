@@ -28,5 +28,6 @@ Run it with the mnemonic and recaptcha key as env vars.
 docker run -p 3000:3000 \
     -e MNEMONIC=$MY_MNEMONIC \
     -e RECAPTCHA_KEY=$RECAPTCHA_KEY \
+    -e PORT=8080 \  # default to 3000
     faucet
 ```
