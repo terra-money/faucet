@@ -1,3 +1,4 @@
+# Build faucet API
 FROM golang:latest as go-builder
 
 WORKDIR /app
@@ -13,21 +14,21 @@ COPY *.go ./
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
-
+# Build front end
 FROM node:lts-alpine as node-builder
 
 WORKDIR /app
 
 COPY frontend/package.json .
-COPY frontend/yarn.lock .
+COPY frontend/package-lock.json .
 
-RUN yarn install
+RUN npm i
 
 COPY frontend .
 
-RUN yarn run build
+RUN npm run build
 
-
+# Copy essential files from build images
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
