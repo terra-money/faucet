@@ -211,6 +211,18 @@ section {
   }
 }
 
+.network_select {
+  position: absolute;
+  margin-top: 6px;
+  right: 20px;
+  height: 36px;
+
+  @media (max-width: 768px) {
+    height: 28px !important;
+    margin-top: 10px;
+  }
+}
+
 .Toastify__toast-container--top-right {
   top: 15px !important;
   right: 15px !important;

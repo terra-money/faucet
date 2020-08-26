@@ -13,75 +13,21 @@ This faucet implementation is a fork of the [Cosmos Faucet](https://github.com/c
 Using the testnet is really easy. Simply go to https://faucet.terra.money and input your testnet address. 
 
 If you don't have a testnet address, or don't know what the Soju testnet is, please refer to [setup docs](https://github.com/terra-project/core/docs/guide/README.md) for more info. 
- 
 
-## Deploying your own faucet
+## Usage
 
-The faucet app offers both a backend and a frontend. Here we offer instructions to deploy both. 
+Build the docker image.
 
-### Deploy faucet server (backend)
-
-You must have `terrad` installed and running on your machine before deploying the faucet server. Follow [setup docs](https://github.com/terra-project/core/docs/guide/README.md) to deploy Terrad if you haven't already. 
-
-#### Get reCAPTCHA Key
-
-Go to the [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin) and create a new reCAPTCHA site. For the version of captcha, choose `reCAPTCHA v2`.
-
-In the file `./frontend/src/views/Faucet.vue` on line 60, change the `sitekey` to your new reCAPTCHA client side integration site key.
-
-```
-sitekey: "6LdqyV0UAAAAAEqgBxvSsDpL2aeTEgkz_VTz1Vi1"
+```bash
+docker build -t faucet .
 ```
 
-#### Set ENV Variables
+Run it with the mnemonic and recaptcha key as env vars.
 
-The faucet requires 4 different enviroment variables to set in order to function. They are: 
-
-1. `mnemonic`, seed mnemonic of your faucet account.
-2. `lcd`, the address of your `terracli rest-server` node (probably don't have to change)
-3. `chain-id`, the chain id of the testnet.
-
-Copy the default settings on the main directory's `env-example.json` file to `env.json` and set the relevant variables.  
-
-#### Build
-
-You need to have Golang and Yarn/Node.js installed on your system.
-
+```bash
+docker run -p 3000:3000 \
+    -e MNEMONIC=$MY_MNEMONIC \
+    -e RECAPTCHA_KEY=$RECAPTCHA_KEY \
+    -e PORT=8080 \  # default to 3000
+    faucet
 ```
-go get github.com/terra-project/faucet
-cd $GOPATH/src/github.com/terra-project/faucet
-dep ensure
-
-cd frontend
-yarn && yarn build
-cd ..
-```
-
-#### Run
-
-This will run the faucet on port 8080. It's highly recommended that you run a reverse proxy with rate limiting in front of this app.
-
-```
-go run faucet.go RECAPTCHA_SERVER_SIDE_SECRET
-```
-
-### Deploy faucet client (frontend)
-
-Deploying the faucet frontend is simple. It is a trivial React app. 
-
-From the topmost directory, run: 
-
-```
-cd $GOPATH/src/github.com/terra-project/faucet/frontend
-npm install
-npm start 
-```
-
-This should start the faucet web server on `localhost:3000`.
-
-Read the [frontend docs](./frontend/README.md) for more detailed instructions. 
-
-
-### Optional: Caddy
-
-Included in this repo is an example `Caddyfile` that lets you run an TLS secured faucet that is rate limited to 1 claim per IP per day. Change the URL to best fit your purposes. 
