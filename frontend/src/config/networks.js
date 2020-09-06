@@ -4,7 +4,7 @@ export default [
     lcd: 'https://soju-fcd.terra.dev',
   },
   {
-    key: 'tequila-0002',
+    key: 'tequila-0004',
     lcd: 'https://tequila-fcd.terra.dev',
   },
 ];
