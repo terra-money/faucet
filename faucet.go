@@ -311,8 +311,8 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 					"gas_adjustment": "1.4",
 					"gas_prices": [
 						{
-							"denom": "ukrw",
-							"amount": "0.015"
+							"denom": "uluna",
+							"amount": "0.15"
 						}
 					]
 				},
