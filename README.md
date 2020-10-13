@@ -8,11 +8,9 @@ Terra Testnet Faucet is a client tool that allows anyone to easily request a nom
 
 This faucet implementation is a fork of the [Cosmos Faucet](https://github.com/cosmos/faucet).
 
-## Get tokens on the Terra Soju Testnet
+## Get tokens on Terra testnets
 
-Using the testnet is really easy. Simply go to https://faucet.terra.money and input your testnet address. 
-
-If you don't have a testnet address, or don't know what the Soju testnet is, please refer to [setup docs](https://github.com/terra-project/core/docs/guide/README.md) for more info. 
+Using the testnets is really easy. Simply go to https://faucet.terra.money, chose your network and input your testnet address. 
 
 ## Usage
 
