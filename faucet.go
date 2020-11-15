@@ -134,10 +134,18 @@ func main() {
 
 	recaptcha.Init(recaptchaKey)
 
-	http.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
-	http.HandleFunc("/claim", createGetCoinsHandler(db))
+	// Pprof server.
+	go func() {
+		log.Fatal(http.ListenAndServe("localhost:8081", nil))
+	}()
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+	// Application server.
+	mux := http.NewServeMux()
+
+	mux.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
+	mux.HandleFunc("/claim", createGetCoinsHandler(db))
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), mux); err != nil {
 		log.Fatal("failed to start server", err)
 	}
 }
