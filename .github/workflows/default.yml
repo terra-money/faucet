@@ -2,12 +2,14 @@ name: CI
 
 on:
   push:
+  release:
+    types: [published]
 
 jobs:
   delivery:
     runs-on: ubuntu-latest
 
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'release'
 
     steps:
       - uses: actions/checkout@v2
