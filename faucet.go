@@ -199,7 +199,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 	// try to update coin
 	for idx, coin := range requestLog.Coins {
 		if coin.Denom == denom {
-			if (coin.Amount + amount) > amountTable[denom]*10 {
+			if (requestLog.Coins[idx].Amount + amount) > amountTable[denom]*10 {
 				return errors.New("amount limit exceeded")
 			}
 
