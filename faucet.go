@@ -47,7 +47,7 @@ var cdc *codec.Codec
 var amountTable = map[string]int64{
 	core.MicroLunaDenom: 1000 * core.MicroUnit,
 	core.MicroKRWDenom:  1000 * core.MicroUnit,
-	core.MicroUSDDenom:  1000 * core.MicroUnit,
+	core.MicroUSDDenom:  5000 * core.MicroUnit,
 	core.MicroSDRDenom:  1000 * core.MicroUnit,
 	core.MicroMNTDenom:  1000 * core.MicroUnit,
 }
