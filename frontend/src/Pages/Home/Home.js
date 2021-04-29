@@ -1,11 +1,11 @@
 import React from 'react';
 // import cx from "classnames";
-import Reaptcha from 'reaptcha';
+import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import b32 from '../../scripts/b32';
+import b32 from '../../lib/b32';
 import networksConfig from '../../config/networks';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -76,12 +76,9 @@ class HomeComponent extends React.Component {
             available tokens is limited.
           </article>
           <div className="recaptcha">
-            <Reaptcha
-              ref={(el) => {
-                this.captcha = el;
-              }}
+            <ReCAPTCHA
               sitekey="6Ld4w4cUAAAAAJceMYGpOTpjiJtMS_xvzOg643ix"
-              onVerify={this.onVerify}
+              onChange={this.onVerify}
             />
           </div>
           <Formik
