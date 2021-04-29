@@ -38,6 +38,7 @@ const REQUEST_LIMIT_SECS = 30;
 
 class HomeComponent extends React.Component {
   static contextType = NetworkContext;
+  recaptchaRef = React.createRef();
 
   constructor(props) {
     super(props);
@@ -48,11 +49,71 @@ class HomeComponent extends React.Component {
     };
   }
 
-  onVerify = (response) => {
+  handleCaptcha = (response) => {
     this.setState({
       response,
       verified: true,
     });
+  };
+
+  handleSubmit = (values, { resetForm }) => {
+    const network = this.context.network;
+    const item = networksConfig.filter((n) => n.key === network)[0];
+    // same shape as initial values
+    this.setState({
+      sending: true,
+      verified: false,
+    });
+
+    this.recaptchaRef.current.reset();
+
+    setTimeout(() => {
+      this.setState({ sending: false });
+    }, REQUEST_LIMIT_SECS * 1000);
+
+    axios
+      .post('/claim', {
+        chain_id: network,
+        lcd_url: item.lcd,
+        address: values.address,
+        denom: values.denom,
+        response: this.state.response,
+      })
+      .then((response) => {
+        const { amount } = response.data;
+
+        toast.success(
+          `Successfully Sent ${amount / 1000000} ${
+            DENUMS_TO_TOKEN[values.denom]
+          } to ${values.address}`
+        );
+
+        resetForm();
+      })
+      .catch((err) => {
+        let errText;
+
+        switch (err.response.status) {
+          case 400:
+            errText = 'Invalid request';
+            break;
+          case 403:
+            errText = 'Too many requests';
+            break;
+          case 404:
+            errText = 'Cannot connect to server';
+            break;
+          case 502:
+          case 503:
+            errText = 'Faucet service temporary unavailable';
+            break;
+          default:
+            errText = err.response.data || err.message;
+            break;
+        }
+
+        toast.error(`An error occurred: ${errText}`);
+      });
   };
 
   render() {
@@ -77,8 +138,9 @@ class HomeComponent extends React.Component {
           </article>
           <div className="recaptcha">
             <ReCAPTCHA
+              ref={this.recaptchaRef}
               sitekey="6Ld4w4cUAAAAAJceMYGpOTpjiJtMS_xvzOg643ix"
-              onChange={this.onVerify}
+              onChange={this.handleCaptcha}
             />
           </div>
           <Formik
@@ -87,46 +149,7 @@ class HomeComponent extends React.Component {
               denom: '',
             }}
             validationSchema={sendSchema}
-            onSubmit={(values, { resetForm }) => {
-              const network = this.context.network;
-              const item = networksConfig.filter((n) => n.key === network)[0];
-              // same shape as initial values
-              this.setState({
-                sending: true,
-                verified: false,
-              });
-
-              this.captcha.reset();
-
-              setTimeout(() => {
-                this.setState({ sending: false });
-              }, REQUEST_LIMIT_SECS * 1000);
-
-              axios
-                .post('/claim', {
-                  chain_id: network,
-                  lcd_url: item.lcd,
-                  address: values.address,
-                  denom: values.denom,
-                  response: this.state.response,
-                })
-                .then((response) => {
-                  const { amount } = response.data;
-
-                  toast.success(
-                    `Successfully Sent ${amount / 1000000} ${
-                      DENUMS_TO_TOKEN[values.denom]
-                    } to ${values.address}`
-                  );
-
-                  resetForm();
-                })
-                .catch((err) => {
-                  toast.error(
-                    `An error occurred: "${err.response.data || err.message}"`
-                  );
-                });
-            }}
+            onSubmit={this.handleSubmit}
           >
             {({ errors, touched }) => (
               <Form className="inputContainer">
