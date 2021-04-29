@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import b32 from '../../lib/b32';
-import networksConfig from '../../config/networks';
+import { networks } from '../../config';
 
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -58,7 +58,7 @@ class HomeComponent extends React.Component {
 
   handleSubmit = (values, { resetForm }) => {
     const network = this.context.network;
-    const item = networksConfig.filter((n) => n.key === network)[0];
+    const item = networks.filter((n) => n.key === network)[0];
     // same shape as initial values
     this.setState({
       sending: true,

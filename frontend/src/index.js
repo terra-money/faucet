@@ -5,7 +5,7 @@ import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import NetworkContext from './contexts/NetworkContext';
-import networks from './config/networks';
+import { networks } from './config';
 
 class Root extends Component {
   setNetwork = (network) => {

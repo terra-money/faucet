@@ -1,5 +1,5 @@
 import React from 'react';
-import networks from '../config/networks';
+import { networks } from '../config';
 
 const NetworkContext = React.createContext({
   network: networks[0].key,
