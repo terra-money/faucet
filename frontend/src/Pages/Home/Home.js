@@ -72,7 +72,7 @@ class HomeComponent extends React.Component {
     }, REQUEST_LIMIT_SECS * 1000);
 
     axios
-      .post('/claim', {
+      .post('https://faucet.terra.dev/claim', {
         chain_id: network,
         lcd_url: item.lcd,
         address: values.address,
