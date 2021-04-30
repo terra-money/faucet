@@ -142,11 +142,7 @@ func main() {
 
 	// Application server.
 	mux := http.NewServeMux()
-<<<<<<< Updated upstream
-
-=======
 	mux.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
->>>>>>> Stashed changes
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
 	c := cors.New(cors.Options{
