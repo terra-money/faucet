@@ -29,6 +29,7 @@ import (
 	"github.com/terra-project/core/app"
 	core "github.com/terra-project/core/types"
 
+	"github.com/rs/cors"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
@@ -141,10 +142,21 @@ func main() {
 
 	// Application server.
 	mux := http.NewServeMux()
+<<<<<<< Updated upstream
 
+=======
+	mux.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
+>>>>>>> Stashed changes
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), mux); err != nil {
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"https://faucet.terra.money"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(mux)
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handler); err != nil {
 		log.Fatal("failed to start server", err)
 	}
 }
