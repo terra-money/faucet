@@ -142,7 +142,6 @@ func main() {
 	// Application server.
 	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), mux); err != nil {

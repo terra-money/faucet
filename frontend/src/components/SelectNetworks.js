@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import s from './SelectNetworks.module.scss';
-import networksConfig from '../config/networks';
+import { networks } from '../config';
 import NetworkContext from '../contexts/NetworkContext';
 
 const SelectNetworks = (props) => {
@@ -14,9 +14,9 @@ const SelectNetworks = (props) => {
         value={network}
         onChange={(e) => setNetwork(e.target.value)}
       >
-        {networksConfig.map(({ key }, index) => {
-          return <option key={index}>{key}</option>;
-        })}
+        {networks.map(({ key }, index) => (
+          <option key={index}>{key}</option>
+        ))}
       </select>
       <div className={s.addon}>
         <i className="material-icons">arrow_drop_down</i>

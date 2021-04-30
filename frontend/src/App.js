@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import Route from './route';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import './App.scss';
 import SelectNetworks from './components/SelectNetworks';
+import Home from './Pages/Home';
 
 class App extends Component {
   showCurrentYear() {
@@ -14,7 +14,7 @@ class App extends Component {
         <header>
           <SelectNetworks className="network_select" />
         </header>
-        <Route />
+        <Route exact path="/" component={Home} />
         <footer>
           &copy; {this.showCurrentYear()} <span>Terra</span>
         </footer>
