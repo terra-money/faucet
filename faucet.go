@@ -142,7 +142,8 @@ func main() {
 
 	// Application server.
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir("./frontend/build/")))
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	})
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
 	c := cors.New(cors.Options{
