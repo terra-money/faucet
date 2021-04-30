@@ -13,21 +13,6 @@ COPY *.go ./
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
-
-FROM node:lts-alpine as node-builder
-
-WORKDIR /app
-
-COPY frontend/package.json .
-COPY frontend/yarn.lock .
-
-RUN yarn install
-
-COPY frontend .
-
-RUN yarn run build
-
-
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
@@ -35,7 +20,6 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /app
 
 COPY --from=go-builder /app/faucet /app/
-COPY --from=node-builder /app/build /app/frontend/build
 
 EXPOSE 3000
 
