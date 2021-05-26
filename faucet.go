@@ -175,8 +175,18 @@ func loadAccountInfo() {
 		return
 	}
 
-	sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, string(body)), 10, 64)
-	accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"?(\d+)"?`, string(body)), 10, 64)
+	bodyStr := string(body)
+	if strings.Contains(bodyStr, `"sequence"`) {
+		sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, bodyStr), 10, 64)
+	} else {
+		sequence = 0
+	}
+
+	if strings.Contains(bodyStr, `"account_number"`) {
+		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"?(\d+)"?`, bodyStr), 10, 64)
+	} else {
+		accountNumber = 0
+	}
 	return
 }
 
