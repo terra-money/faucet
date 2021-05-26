@@ -28,10 +28,10 @@ const sendSchema = Yup.object().shape({
 
 const DENUMS_TO_TOKEN = {
   uluna: 'Luna',
-  ukrw: 'KRT',
   uusd: 'UST',
+  ueur: 'EUT',
   usdr: 'SDT',
-  umnt: 'MNT',
+  ukrw: 'KRT',
 };
 
 const REQUEST_LIMIT_SECS = 30;
