@@ -334,7 +334,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 					"chain_id": "%v",
 					"sequence": "%v",
 					"gas": "auto",
-					"gas_adjustment": "1.4",
+					"gas_adjustment": "2.0",
 					"gas_prices": [
 						{
 							"denom": "ukrw",
