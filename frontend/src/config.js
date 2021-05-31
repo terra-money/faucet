@@ -5,6 +5,6 @@ export const networks = [
   },
   {
     key: 'bombay-0006',
-    lcd: 'http://bombay-lcd.terra.dev',
+    lcd: 'https://bombay-lcd.terra.dev',
   },
 ];
