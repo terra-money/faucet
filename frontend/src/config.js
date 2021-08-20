@@ -4,7 +4,7 @@ export const networks = [
     lcd: 'https://tequila-lcd.terra.dev',
   },
   {
-    key: 'bombay-9',
+    key: 'bombay-10',
     lcd: 'https://bombay-lcd.terra.dev',
   },
 ];
