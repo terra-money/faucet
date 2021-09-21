@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7",
-    "babel-loader": "^8",
+    "babel-loader": "8.1.0",
     "husky": "^4",
     "lint-staged": "^10",
     "prettier": "^2",
