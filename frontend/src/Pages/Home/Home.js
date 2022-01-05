@@ -217,7 +217,7 @@ class HomeComponent extends React.Component {
               </i>
               <span>
                 <a
-                  href="https://docs.terra.money/Tutorials/Get-started/Use-Terra-Station.html"
+                  href="https://docs.terra.money/How-to/Run-a-full-Terra-node/Join-public-network.html#pick-a-network"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
