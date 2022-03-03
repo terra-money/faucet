@@ -28,10 +28,6 @@ const sendSchema = Yup.object().shape({
 
 const DENUMS_TO_TOKEN = {
   uluna: 'Luna',
-  uusd: 'UST',
-  ueur: 'EUT',
-  usdr: 'SDT',
-  ukrw: 'KRT',
 };
 
 const REQUEST_LIMIT_SECS = 30;
@@ -163,27 +159,7 @@ class HomeComponent extends React.Component {
                     <div className="fieldError">{errors.address}</div>
                   ) : null}
                 </div>
-                <div className="select">
-                  <Field component="select" name="denom">
-                    <option value="" default>
-                      Select denom to receive...
-                    </option>
-                    <option value="uluna">{DENUMS_TO_TOKEN['uluna']}</option>
-                    <option value="ukrw">{DENUMS_TO_TOKEN['ukrw']}</option>
-                    <option value="uusd">{DENUMS_TO_TOKEN['uusd']}</option>
-                    <option value="usdr">{DENUMS_TO_TOKEN['usdr']}</option>
-                    <option value="umnt">{DENUMS_TO_TOKEN['umnt']}</option>
-                  </Field>
-                  {errors.denom && touched.denom ? (
-                    <div className="fieldError selectFieldError">
-                      {errors.denom}
-                    </div>
-                  ) : null}
-                  <div className="selectAddon">
-                    <i className="material-icons">arrow_drop_down</i>
-                  </div>
-                </div>
-
+                <input type="hidden" name="denom" value="uluna" />
                 <div className="buttonContainer">
                   <button
                     disabled={!this.state.verified || this.state.sending}
