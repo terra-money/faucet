@@ -142,7 +142,7 @@ class HomeComponent extends React.Component {
           <Formik
             initialValues={{
               address: '',
-              denom: '',
+              denom: 'uluna',
             }}
             validationSchema={sendSchema}
             onSubmit={this.handleSubmit}
@@ -159,7 +159,7 @@ class HomeComponent extends React.Component {
                     <div className="fieldError">{errors.address}</div>
                   ) : null}
                 </div>
-                <input type="hidden" name="denom" value="uluna" />
+                <Field type="hidden" name="denom" value="uluna" />
                 <div className="buttonContainer">
                   <button
                     disabled={!this.state.verified || this.state.sending}
