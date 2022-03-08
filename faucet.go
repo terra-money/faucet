@@ -54,12 +54,12 @@ const (
 	mnemonicVar      = "MNEMONIC"
 	recaptchaKeyVar  = "RECAPTCHA_KEY"
 	portVar          = "PORT"
+	lcdUrlVar        = "LCD_URL"
+	chainIDVar       = "CHAIN_ID"
 )
 
 // Claim wraps a faucet claim
 type Claim struct {
-	ChainID  string `json:"chain_id"`
-	LcdURL   string `json:"lcd_url"`
 	Address  string `json:"address"`
 	Response string `json:"response"`
 	Denom    string `json:"denom"`
@@ -69,6 +69,10 @@ type Claim struct {
 type Coin struct {
 	Denom  string `json:"denom"`
 	Amount int64  `json:"amount"`
+}
+
+type ResponseBody struct {
+	err string `json:"error"`
 }
 
 func newCodec() *codec.Codec {
@@ -105,8 +109,21 @@ func main() {
 	}
 
 	port = os.Getenv(portVar)
+
 	if port == "" {
 		port = "3000"
+	}
+
+	lcdURL = os.Getenv(lcdUrlVar)
+
+	if lcdURL == "" {
+		panic("LCD_URL variable is required")
+	}
+
+	chainID = os.Getenv(chainIDVar)
+
+	if chainID == "" {
+		panic("CHAIN_ID variable is required")
 	}
 
 	cdc = newCodec()
@@ -127,7 +144,8 @@ func main() {
 		return
 	}
 
-	fmt.Println(address)
+	// Load account number and sequence
+	loadAccountInfo()
 
 	recaptcha.Init(recaptchaKey)
 
@@ -183,7 +201,8 @@ func loadAccountInfo() {
 	} else {
 		accountNumber = 0
 	}
-	return
+
+	fmt.Printf("loadAccountInfo: address %v account# %v sequence %v\n", address, accountNumber, sequence)
 }
 
 func parseRegexp(regexpStr string, target string) (data string) {
@@ -268,6 +287,58 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 	return nil
 }
 
+func drip(encodedAddress string, denom string, amount int64) []byte {
+	url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdURL, encodedAddress)
+	data := strings.TrimSpace(fmt.Sprintf(`{
+		"base_req": {
+			"from": "%v",
+			"memo": "%v",
+			"chain_id": "%v",
+			"sequence": "%v",
+			"gas": "auto",
+			"gas_adjustment": "1.8",
+			"gas_prices": [
+				{
+					"denom": "ukrw",
+					"amount": "169.77"
+				}
+			]
+		},
+		"coins": [
+			{
+				"denom": "%v",
+				"amount": "%v"
+			}
+		]
+	}`, address, "faucet", chainID, sequence, denom, amount))
+
+	response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
+	if err != nil {
+		panic(err)
+	}
+
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if response.StatusCode != 200 {
+		stringBody := string(body)
+
+		if strings.Contains(stringBody, "sequence mismatch") {
+			return make([]byte, 0)
+		}
+
+		err := errors.New(string(body))
+		panic(err)
+	}
+
+	return body
+}
+
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, request *http.Request) {
 
@@ -278,21 +349,19 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		}()
 
 		var claim Claim
+
 		// decode JSON response from front end
 		decoder := json.NewDecoder(request.Body)
 		decoderErr := decoder.Decode(&claim)
+
 		if decoderErr != nil {
 			panic(decoderErr)
 		}
 
-		chainID = claim.ChainID
-		lcdURL = claim.LcdURL
-
-		loadAccountInfo()
-
 		amount, ok := amountTable[claim.Denom]
+
 		if !ok {
-			panic(fmt.Errorf("Invalid Denom; %v", claim.Denom))
+			panic(fmt.Errorf("invalid denom; %v", claim.Denom))
 		}
 
 		// make sure address is bech32
@@ -322,54 +391,20 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-			url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdURL, encodedAddress)
-			data := strings.TrimSpace(fmt.Sprintf(`{
-				"base_req": {
-					"from": "%v",
-					"memo": "%v",
-					"chain_id": "%v",
-					"sequence": "%v",
-					"gas": "auto",
-					"gas_adjustment": "2.0",
-					"gas_prices": [
-						{
-							"denom": "ukrw",
-							"amount": "178.05"
-						}
-					]
-				},
-				"coins": [
-					{
-						"denom": "%v",
-						"amount": "%v"
-					}
-				]
+			body := drip(encodedAddress, claim.Denom, amount)
 
-			}`, address, "faucet", chainID, sequence, claim.Denom, amount))
-
-			response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
-			if err != nil {
-				panic(err)
-			}
-
-			if response.StatusCode != 200 {
-				err := errors.New(response.Status)
-				panic(err)
-			}
-
-			defer response.Body.Close()
-
-			body, err := ioutil.ReadAll(response.Body)
-			if err != nil {
-				panic(err)
+			// Sequence mismatch if the body length is zero
+			if len(body) == 0 {
+				// Reload for self healing and re-drip
+				loadAccountInfo()
+				body = drip(encodedAddress, claim.Denom, amount)
 			}
 
 			resJSON := signAndBroadcast(body)
+			sequence = sequence + 1
 
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
 			fmt.Println(resJSON)
-
-			sequence = sequence + 1
 
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, resJSON)
@@ -377,8 +412,6 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			err := errors.New("captcha failed, please refresh page and try again")
 			panic(err)
 		}
-
-		return
 	}
 }
 
@@ -413,7 +446,7 @@ func signAndBroadcast(txJSON []byte) string {
 		Signature: sig}}
 	tx := auth.NewStdTx(stdTx.Msgs, stdTx.Fee, sigs, stdTx.Memo)
 	broadcastReq.Tx = tx
-	broadcastReq.Mode = "block"
+	broadcastReq.Mode = "sync"
 
 	bz := cdc.MustMarshalJSON(broadcastReq)
 
