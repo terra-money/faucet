@@ -83,44 +83,46 @@ class HomeComponent extends React.Component {
         } else {
           const url = `https://finder.extraterrestrial.money/testnet/tx/${response.txhash}`;
           toast.success(
-            <>
+            <div>
               <p>
-                `Successfully Sent ${amount / 1000000} $
-                {DENUMS_TO_TOKEN[values.denom]} to ${values.address}`
+                Successfully Sent {amount / 1000000}
+                {DENUMS_TO_TOKEN[values.denom]} to {values.address}
               </p>
               <a href={url} target="_blank" rel="noopener noreferrer">
                 Go to explorer
               </a>
-            </>
+            </div>
           );
         }
 
         resetForm();
       })
       .catch((err) => {
-        let errText;
+        let errText = err.message;
 
         if (err.response) {
-          switch (err.response.status) {
-            case 400:
-              errText = 'Invalid request';
-              break;
-            case 403:
-              errText = 'Too many requests';
-              break;
-            case 404:
-              errText = 'Cannot connect to server';
-              break;
-            case 502:
-            case 503:
-              errText = 'Faucet service temporary unavailable';
-              break;
-            default:
-              errText = err.response.data || err.message;
-              break;
+          if (err.response.data) {
+            errText = err.response.data;
+          } else {
+            switch (err.response.status) {
+              case 400:
+                errText = 'Invalid request';
+                break;
+              case 403:
+              case 429:
+                errText = 'Too many requests';
+                break;
+              case 404:
+                errText = 'Cannot connect to server';
+                break;
+              case 502:
+              case 503:
+                errText = 'Faucet service temporary unavailable';
+                break;
+              default:
+                errText = err.message;
+            }
           }
-        } else {
-          errText = err.message;
         }
 
         toast.error(`An error occurred: ${errText}`);
