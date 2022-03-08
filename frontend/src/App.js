@@ -16,7 +16,7 @@ class App extends Component {
         </header>
         <Route exact path="/" component={Home} />
         <footer>
-          &copy; {this.showCurrentYear()} <span>Terra</span>
+          &copy; 2019-{this.showCurrentYear()} <span>Terra</span>
         </footer>
       </Router>
     );
