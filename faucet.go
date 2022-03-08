@@ -287,7 +287,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 	return nil
 }
 
-func drip(encodedAddress string, denom string, amount int64) []byte {
+func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) []byte {
 	url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdURL, encodedAddress)
 	data := strings.TrimSpace(fmt.Sprintf(`{
 		"base_req": {
@@ -328,11 +328,11 @@ func drip(encodedAddress string, denom string, amount int64) []byte {
 	if response.StatusCode != 200 {
 		stringBody := string(body)
 
-		if strings.Contains(stringBody, "sequence mismatch") {
+		if isDetectMismatch && strings.Contains(stringBody, "sequence mismatch") {
 			return make([]byte, 0)
 		}
 
-		err := errors.New(string(body))
+		err := errors.New(stringBody)
 		panic(err)
 	}
 
@@ -391,13 +391,19 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-			body := drip(encodedAddress, claim.Denom, amount)
+			body := drip(encodedAddress, claim.Denom, amount, true)
 
 			// Sequence mismatch if the body length is zero
 			if len(body) == 0 {
 				// Reload for self healing and re-drip
 				loadAccountInfo()
-				body = drip(encodedAddress, claim.Denom, amount)
+				body = drip(encodedAddress, claim.Denom, amount, true)
+
+				// Another try without loading....
+				if len(body) == 0 {
+					sequence = sequence + 1
+					body = drip(encodedAddress, claim.Denom, amount, false)
+				}
 			}
 
 			resJSON := signAndBroadcast(body)
