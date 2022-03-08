@@ -287,56 +287,35 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 	return nil
 }
 
-func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) []byte {
-	url := fmt.Sprintf("%v/bank/accounts/%v/transfers", lcdURL, encodedAddress)
+func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
 	data := strings.TrimSpace(fmt.Sprintf(`{
-		"base_req": {
-			"from": "%v",
-			"memo": "%v",
-			"chain_id": "%v",
-			"sequence": "%v",
-			"gas": "auto",
-			"gas_adjustment": "1.8",
-			"gas_prices": [
-				{
-					"denom": "ukrw",
-					"amount": "169.77"
+		"type": "core/StdTx",
+		"value": {
+			"msg": [{
+				"type": "bank/MsgSend",
+				"value": {
+					"from_address": "%v",
+					"to_address": "%v",
+					"amount": [{
+						"denom": "%v",
+						"amount": "%v"
+					}]
 				}
-			]
-		},
-		"coins": [
-			{
-				"denom": "%v",
-				"amount": "%v"
-			}
-		]
-	}`, address, "faucet", chainID, sequence, denom, amount))
-
-	response, err := http.Post(url, "application/json", bytes.NewReader([]byte(data)))
-	if err != nil {
-		panic(err)
-	}
-
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-
-	if err != nil {
-		panic(err)
-	}
-
-	if response.StatusCode != 200 {
-		stringBody := string(body)
-
-		if isDetectMismatch && strings.Contains(stringBody, "sequence mismatch") {
-			return make([]byte, 0)
+			}],
+			"fee": {
+				"amount": [{
+					"denom": "ukrw",
+					"amount": "25500000"
+				}],
+				"gas": "150000"
+			},
+			"signatures": [],
+			"memo": "%v",
+			"timeout_height": "0"
 		}
+	}`, address, encodedAddress, denom, amount, "faucet"))
 
-		err := errors.New(stringBody)
-		panic(err)
-	}
-
-	return body
+	return signAndBroadcast([]byte(data), isDetectMismatch)
 }
 
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
@@ -406,14 +385,15 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 				}
 			}
 
-			resJSON := signAndBroadcast(body)
-			sequence = sequence + 1
+			if len(body) != 0 {
+				sequence = sequence + 1
+			}
 
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
-			fmt.Println(resJSON)
+			fmt.Println(body)
 
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, resJSON)
+			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, body)
 		} else {
 			err := errors.New("captcha failed, please refresh page and try again")
 			panic(err)
@@ -423,11 +403,13 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 // BroadcastReq defines a tx broadcasting request.
 type BroadcastReq struct {
-	Tx   auth.StdTx `json:"tx"`
-	Mode string     `json:"mode"`
+	Tx         auth.StdTx `json:"tx"`
+	Mode       string     `json:"mode"`
+	Sequences  []uint64   `json:"sequences" yaml:"sequences"`
+	FeeGranter string     `json:"fee_granter" yaml:"fee_granter"`
 }
 
-func signAndBroadcast(txJSON []byte) string {
+func signAndBroadcast(txJSON []byte, isDetectMismatch bool) string {
 	var broadcastReq BroadcastReq
 	var stdTx auth.StdTx
 
@@ -453,6 +435,7 @@ func signAndBroadcast(txJSON []byte) string {
 	tx := auth.NewStdTx(stdTx.Msgs, stdTx.Fee, sigs, stdTx.Memo)
 	broadcastReq.Tx = tx
 	broadcastReq.Mode = "sync"
+	broadcastReq.Sequences = []uint64{sequence}
 
 	bz := cdc.MustMarshalJSON(broadcastReq)
 
@@ -469,9 +452,15 @@ func signAndBroadcast(txJSON []byte) string {
 		panic(err)
 	}
 
+	stringBody := string(body)
+
 	if response.StatusCode != 200 {
-		err := fmt.Errorf("status: %v, message: %v", response.Status, string(body))
+		err := fmt.Errorf("status: %v, message: %v", response.Status, stringBody)
 		panic(err)
+	}
+
+	if isDetectMismatch && strings.Contains(stringBody, "sequence mismatch") {
+		return ""
 	}
 
 	return string(body)

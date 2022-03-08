@@ -75,14 +75,18 @@ class HomeComponent extends React.Component {
         denom: values.denom,
         response: this.state.response,
       })
-      .then((response) => {
-        const { amount } = response.data;
+      .then((res) => {
+        const { amount, response } = res.data;
 
-        toast.success(
-          `Successfully Sent ${amount / 1000000} ${
-            DENUMS_TO_TOKEN[values.denom]
-          } to ${values.address}`
-        );
+        if (response.code) {
+          toast.error(`Error: ${response.raw_log || `code: ${response.code}`}`);
+        } else {
+          toast.success(
+            `Successfully Sent ${amount / 1000000} ${
+              DENUMS_TO_TOKEN[values.denom]
+            } to ${values.address}`
+          );
+        }
 
         resetForm();
       })
