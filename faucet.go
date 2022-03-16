@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/dpapathanasiou/go-recaptcha"
@@ -191,7 +190,6 @@ func loadAccountInfo() {
 
 	bodyStr := string(body)
 	if strings.Contains(bodyStr, `"sequence"`) {
-		atomic.LoadUint64()
 		sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, bodyStr), 10, 64)
 	} else {
 		sequence = 0
