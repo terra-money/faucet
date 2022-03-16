@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/dpapathanasiou/go-recaptcha"
@@ -49,6 +51,8 @@ var amountTable = map[string]int64{
 	core.MicroLunaDenom: 10 * core.MicroUnit,
 }
 
+var mtx sync.Mutex
+
 const (
 	requestLimitSecs = 30
 	mnemonicVar      = "MNEMONIC"
@@ -69,10 +73,6 @@ type Claim struct {
 type Coin struct {
 	Denom  string `json:"denom"`
 	Amount int64  `json:"amount"`
-}
-
-type ResponseBody struct {
-	err string `json:"error"`
 }
 
 func newCodec() *codec.Codec {
@@ -191,6 +191,7 @@ func loadAccountInfo() {
 
 	bodyStr := string(body)
 	if strings.Contains(bodyStr, `"sequence"`) {
+		atomic.LoadUint64()
 		sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, bodyStr), 10, 64)
 	} else {
 		sequence = 0
@@ -370,6 +371,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
+			mtx.Lock()
 			body := drip(encodedAddress, claim.Denom, amount, true)
 
 			// Sequence mismatch if the body length is zero
@@ -388,6 +390,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			if len(body) != 0 {
 				sequence = sequence + 1
 			}
+			mtx.Unlock()
 
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
 			fmt.Println(body)
