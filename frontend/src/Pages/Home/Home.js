@@ -5,7 +5,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import b32 from '../../lib/b32';
+import * as bech32 from 'bech32';
 import { networks } from '../../config';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,11 +13,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../App.scss';
 import NetworkContext from '../../contexts/NetworkContext';
 
-const bech32Validate = (param) => {
+const validateWalletAddress = (str) => {
   try {
-    b32.decode(param);
-  } catch (error) {
-    return error.message;
+    const { prefix } = bech32.decode(str);
+    if (prefix !== 'terra') {
+      throw new Error('Invalid address');
+    }
+  } catch {
+    return 'Enter valid wallet address';
   }
 };
 
@@ -170,7 +173,7 @@ class HomeComponent extends React.Component {
                   <Field
                     name="address"
                     placeholder="Testnet address"
-                    validate={bech32Validate}
+                    validate={validateWalletAddress}
                   />
                   {errors.address && touched.address ? (
                     <div className="fieldError">{errors.address}</div>
