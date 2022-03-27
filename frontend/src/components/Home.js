@@ -118,6 +118,7 @@ class HomeComponent extends React.Component {
               case 404:
                 errText = 'Cannot connect to server';
                 break;
+              case 500:
               case 502:
               case 503:
                 errText = 'Faucet service temporary unavailable';
