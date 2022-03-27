@@ -6,12 +6,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import * as bech32 from 'bech32';
-import { networks } from '../../config';
+import { networks } from '../config';
 
 import 'react-toastify/dist/ReactToastify.css';
 
-import '../../App.scss';
-import NetworkContext from '../../contexts/NetworkContext';
+import '../App.scss';
+import NetworkContext from '../contexts/NetworkContext';
 
 const validateWalletAddress = (str) => {
   try {
