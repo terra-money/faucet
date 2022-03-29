@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,6 +30,7 @@ import (
 	"github.com/terra-project/core/app"
 	core "github.com/terra-project/core/types"
 
+	"github.com/PagerDuty/go-pagerduty"
 	"github.com/rs/cors"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -45,17 +47,28 @@ var sequence uint64
 var accountNumber uint64
 var cdc *codec.Codec
 
+type PagerdutyConfig struct {
+	token     string
+	user      string
+	serviceID string
+}
+
+var pagerdutyConfig PagerdutyConfig
+
 var amountTable = map[string]int64{
-	core.MicroLunaDenom: 10 * core.MicroUnit,
+	core.MicroLunaDenom: 5 * core.MicroUnit,
 }
 
 const (
-	requestLimitSecs = 30
-	mnemonicVar      = "MNEMONIC"
-	recaptchaKeyVar  = "RECAPTCHA_KEY"
-	portVar          = "PORT"
-	lcdUrlVar        = "LCD_URL"
-	chainIDVar       = "CHAIN_ID"
+	requestLimitSecs      = 30
+	mnemonicVar           = "MNEMONIC"
+	recaptchaKeyVar       = "RECAPTCHA_KEY"
+	portVar               = "PORT"
+	lcdUrlVar             = "LCD_URL"
+	chainIDVar            = "CHAIN_ID"
+	pagerdutyTokenVar     = "PAGERDUTY_TOKEN"
+	pagerdutyUserVar      = "PAGERDUTY_USER"
+	pagerdutyServiceIDVar = "PAGERDUTY_SERVICE_ID"
 )
 
 // Claim wraps a faucet claim
@@ -83,89 +96,6 @@ func newCodec() *codec.Codec {
 	config.Seal()
 
 	return cdc
-}
-
-func main() {
-	db, err := leveldb.OpenFile("db/ipdb", nil)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	mnemonic = os.Getenv(mnemonicVar)
-
-	if mnemonic == "" {
-		panic("MNEMONIC variable is required")
-	}
-
-	recaptchaKey = os.Getenv(recaptchaKeyVar)
-
-	if recaptchaKey == "" {
-		panic("RECAPTCHA_KEY variable is required")
-	}
-
-	port = os.Getenv(portVar)
-
-	if port == "" {
-		port = "3000"
-	}
-
-	lcdURL = os.Getenv(lcdUrlVar)
-
-	if lcdURL == "" {
-		panic("LCD_URL variable is required")
-	}
-
-	chainID = os.Getenv(chainIDVar)
-
-	if chainID == "" {
-		panic("CHAIN_ID variable is required")
-	}
-
-	cdc = newCodec()
-
-	seed := bip39.NewSeed(mnemonic, "")
-	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
-	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, core.FullFundraiserPath)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	privKey = secp256k1.PrivKeySecp256k1(derivedPriv)
-	pubk := privKey.PubKey()
-	address, err = bech32.ConvertAndEncode("terra", pubk.Address())
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	// Load account number and sequence
-	loadAccountInfo()
-
-	recaptcha.Init(recaptchaKey)
-
-	// Pprof server.
-	go func() {
-		log.Fatal(http.ListenAndServe("localhost:8081", nil))
-	}()
-
-	// Application server.
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	})
-	mux.HandleFunc("/claim", createGetCoinsHandler(db))
-
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://faucet.terra.money"},
-		AllowCredentials: true,
-	})
-
-	handler := c.Handler(mux)
-
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handler); err != nil {
-		log.Fatal("failed to start server", err)
-	}
 }
 
 func loadAccountInfo() {
@@ -201,6 +131,36 @@ func loadAccountInfo() {
 	fmt.Printf("loadAccountInfo: address %v account# %v sequence %v\n", address, accountNumber, sequence)
 }
 
+type CoreCoin struct {
+	Denom  string `json:"denom"`
+	Amount string `json:"amount"`
+}
+
+type BalanceResponse struct {
+	Balance CoreCoin `json:"balance"`
+}
+
+func getBalance(address string) (amount int64) {
+	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=uluna", lcdURL, address)
+	response, err := http.Get(url)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var res BalanceResponse
+
+	decoder := json.NewDecoder(response.Body)
+	decoderErr := decoder.Decode(&res)
+
+	if decoderErr != nil {
+		panic(decoderErr)
+	}
+
+	i, _ := strconv.ParseInt(res.Balance.Amount, 10, 64)
+	return i
+}
+
 func parseRegexp(regexpStr string, target string) (data string) {
 	// Capture seqeunce string from json
 	r := regexp.MustCompile(regexpStr)
@@ -228,7 +188,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 	// try to update coin
 	for idx, coin := range requestLog.Coins {
 		if coin.Denom == denom {
-			if (requestLog.Coins[idx].Amount + amount) > amountTable[denom]*10 {
+			if (requestLog.Coins[idx].Amount + amount) > amountTable[denom]*2 {
 				return errors.New("amount limit exceeded")
 			}
 
@@ -243,6 +203,12 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 }
 
 func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
+	address, _ := bech32.ConvertAndEncode("terra", account)
+
+	if getBalance(address) >= amountTable[denom]*2 {
+		return errors.New("amount limit exceeded")
+	}
+
 	var requestLog RequestLog
 
 	logBytes, _ := db.Get(account, nil)
@@ -366,6 +332,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
+			fmt.Println(time.Now().UTC().Format(time.RFC3339), "req", clientIP, encodedAddress, amount, claim.Denom)
 			body := drip(encodedAddress, claim.Denom, amount, true)
 
 			// Sequence mismatch if the body length is zero
@@ -385,8 +352,12 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 				sequence = sequence + 1
 			}
 
-			fmt.Println(time.Now().UTC().Format(time.RFC3339), encodedAddress, "[1] ", amount, claim.Denom)
-			fmt.Println(body)
+			fmt.Println(time.Now().UTC().Format(time.RFC3339), "res", body)
+
+			// Alert for error
+			if strings.Contains(body, "code") {
+				createIncident(body)
+			}
 
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, body)
@@ -459,5 +430,113 @@ func signAndBroadcast(txJSON []byte, isDetectMismatch bool) string {
 		return ""
 	}
 
-	return string(body)
+	return stringBody
+}
+
+func createIncident(body string) (*pagerduty.Incident, error) {
+	client := pagerduty.NewClient(pagerdutyConfig.token)
+	input := &pagerduty.CreateIncidentOptions{
+		Title:   "Faucet had an error",
+		Urgency: "low",
+		Service: &pagerduty.APIReference{
+			ID:   pagerdutyConfig.serviceID,
+			Type: "service",
+		},
+		Body: &pagerduty.APIDetails{
+			Details: body,
+		},
+	}
+
+	return client.CreateIncidentWithContext(context.Background(), pagerdutyConfig.user, input)
+}
+
+func main() {
+	mnemonic = os.Getenv(mnemonicVar)
+
+	if mnemonic == "" {
+		panic("MNEMONIC variable is required")
+	}
+
+	recaptchaKey = os.Getenv(recaptchaKeyVar)
+
+	if recaptchaKey == "" {
+		panic("RECAPTCHA_KEY variable is required")
+	}
+
+	port = os.Getenv(portVar)
+
+	if port == "" {
+		port = "3000"
+	}
+
+	lcdURL = os.Getenv(lcdUrlVar)
+
+	if lcdURL == "" {
+		panic("LCD_URL variable is required")
+	}
+
+	chainID = os.Getenv(chainIDVar)
+
+	if chainID == "" {
+		panic("CHAIN_ID variable is required")
+	}
+
+	pagerdutyConfig.token = os.Getenv(pagerdutyTokenVar)
+	pagerdutyConfig.user = os.Getenv(pagerdutyUserVar)
+	pagerdutyConfig.serviceID = os.Getenv(pagerdutyServiceIDVar)
+
+	if pagerdutyConfig.token == "" || pagerdutyConfig.user == "" || pagerdutyConfig.serviceID == "" {
+		panic("PAGERDUTY_TOKEN, PAGERDUTY_USER, and PAGERDUTY_SERVICE_ID variables are required")
+	}
+
+	db, err := leveldb.OpenFile("db/ipdb", nil)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	cdc = newCodec()
+
+	seed := bip39.NewSeed(mnemonic, "")
+	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
+	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, core.FullFundraiserPath)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	privKey = secp256k1.PrivKeySecp256k1(derivedPriv)
+	pubk := privKey.PubKey()
+	address, err = bech32.ConvertAndEncode("terra", pubk.Address())
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	// Load account number and sequence
+	loadAccountInfo()
+
+	recaptcha.Init(recaptchaKey)
+
+	// Pprof server.
+	go func() {
+		log.Fatal(http.ListenAndServe("localhost:8081", nil))
+	}()
+
+	// Application server.
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	})
+	mux.HandleFunc("/claim", createGetCoinsHandler(db))
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"https://faucet.terra.money"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(mux)
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handler); err != nil {
+		log.Fatal("failed to start server", err)
+	}
 }

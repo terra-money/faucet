@@ -1,6 +1,7 @@
 module github.com/terra-project/faucet
 
 require (
+	github.com/PagerDuty/go-pagerduty v1.5.0
 	github.com/btcsuite/btcd v0.0.0-20190605094302-a0d1e3e36d50 // indirect
 	github.com/cosmos/cosmos-sdk v0.37.4
 	github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d

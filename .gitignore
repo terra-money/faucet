@@ -4,3 +4,4 @@ vendor
 faucet
 db/
 env.json
+.envrc
