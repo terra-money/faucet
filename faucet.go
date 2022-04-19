@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dpapathanasiou/go-recaptcha"
@@ -46,6 +47,7 @@ var address string
 var sequence uint64
 var accountNumber uint64
 var cdc *codec.Codec
+var mtx sync.Mutex
 
 type PagerdutyConfig struct {
 	token     string
@@ -332,6 +334,9 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
+			mtx.Lock()
+			defer mtx.Unlock()
+
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), "req", clientIP, encodedAddress, amount, claim.Denom)
 			body := drip(encodedAddress, claim.Denom, amount, true)
 
