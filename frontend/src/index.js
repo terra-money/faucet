@@ -9,12 +9,11 @@ import { networks } from './config';
 
 class Root extends Component {
   setNetwork = (network) => {
-    this.setState({
-      network: network,
-    });
+    this.setState({ network });
   };
+
   state = {
-    network: networks[0].key,
+    network: networks[0].chainId,
     setNetwork: this.setNetwork,
   };
 
