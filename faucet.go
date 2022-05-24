@@ -13,6 +13,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+  "sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/dpapathanasiou/go-recaptcha"
@@ -46,6 +48,7 @@ var address string
 var sequence uint64
 var accountNumber uint64
 var cdc *codec.Codec
+var mtx sync.Mutex
 
 type PagerdutyConfig struct {
 	token     string
@@ -116,11 +119,15 @@ func loadAccountInfo() {
 	}
 
 	bodyStr := string(body)
+	var seq uint64
+
 	if strings.Contains(bodyStr, `"sequence"`) {
-		sequence, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, bodyStr), 10, 64)
+		seq, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, bodyStr), 10, 64)
 	} else {
-		sequence = 0
+		seq = 0
 	}
+
+	sequence = atomic.LoadUint64(&seq)
 
 	if strings.Contains(bodyStr, `"account_number"`) {
 		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"?(\d+)"?`, bodyStr), 10, 64)
@@ -226,8 +233,8 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 			return errors.New("please wait a while for another tap")
 		}
 
-		// reset log if date was changed
-		if requestLog.Requested.Day() != now.Day() {
+		// reset log if month was changed
+		if requestLog.Requested.Month() != now.Month() {
 			requestLog.Coins = []Coin{}
 		}
 
@@ -332,6 +339,9 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
+      mtx.Lock()
+      defer mtx.Unlock()
+
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), "req", clientIP, encodedAddress, amount, claim.Denom)
 			body := drip(encodedAddress, claim.Denom, amount, true)
 
@@ -343,21 +353,21 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 				// Another try without loading....
 				if len(body) == 0 {
-					sequence = sequence + 1
+					atomic.AddUint64(&sequence, 1)
 					body = drip(encodedAddress, claim.Denom, amount, false)
 				}
 			}
 
-			if len(body) != 0 {
-				sequence = sequence + 1
-			}
+      if len(body) != 0 {
+        atomic.AddUint64(&sequence, 1)
+      }
 
-			fmt.Println(time.Now().UTC().Format(time.RFC3339), "res", body)
+      fmt.Printf("%v seq %v %v\n", time.Now().UTC().Format(time.RFC3339), sequence, body)
 
-			// Alert for error
-			if strings.Contains(body, "code") {
-				createIncident(body)
-			}
+      // Create an incident for broadcast error
+      if strings.Contains(body, "code") {
+        createIncident(body)
+      }
 
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, body)
