@@ -56,8 +56,9 @@ class HomeComponent extends React.Component {
   };
 
   handleSubmit = (values, { resetForm }) => {
-    const network = this.context.network;
-    const item = networks.filter((n) => n.key === network)[0];
+    const network = networks.filter(
+      (n) => n.chainId === this.context.chainId
+    )[0];
     // same shape as initial values
     this.setState({
       sending: true,
@@ -71,9 +72,7 @@ class HomeComponent extends React.Component {
     }, REQUEST_LIMIT_SECS * 1000);
 
     axios
-      .post('https://faucet.terra.dev/claim', {
-        chain_id: network,
-        lcd_url: item.lcd,
+      .post(network.faucetUrl, {
         address: values.address,
         denom: values.denom,
         response: this.state.response,

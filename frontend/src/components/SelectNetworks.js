@@ -14,8 +14,8 @@ const SelectNetworks = (props) => {
         value={network}
         onChange={(e) => setNetwork(e.target.value)}
       >
-        {networks.map(({ key }, index) => (
-          <option key={index}>{key}</option>
+        {networks.map(({ chainId }, index) => (
+          <option key={index}>{chainId}</option>
         ))}
       </select>
       <div className={s.addon}>
