@@ -528,11 +528,6 @@ func main() {
 
 	recaptcha.Init(recaptchaKey)
 
-	// Pprof server.
-	go func() {
-		log.Fatal(http.ListenAndServe("localhost:8081", nil))
-	}()
-
 	// Application server.
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

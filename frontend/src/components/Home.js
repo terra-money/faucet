@@ -57,7 +57,7 @@ class HomeComponent extends React.Component {
 
   handleSubmit = (values, { resetForm }) => {
     const network = networks.filter(
-      (n) => n.chainId === this.context.chainId
+      (n) => n.chainId === this.context.network
     )[0];
     // same shape as initial values
     this.setState({
