@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -196,8 +195,6 @@ func parseRegexp(regexpStr string, target string) (data string) {
 	groups := r.FindStringSubmatch(string(target))
 
 	if len(groups) != 2 {
-		fmt.Println("cannot find data")
-		fmt.Println(target)
 		os.Exit(1)
 	}
 
@@ -308,7 +305,6 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				http.Error(w, err.(error).Error(), 400)
-				fmt.Println(string(debug.Stack()))
 			}
 		}()
 
