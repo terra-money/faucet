@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,31 +12,37 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
-  "sync"
+	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/dpapathanasiou/go-recaptcha"
+	"github.com/rs/cors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/tendermint/tmlibs/bech32"
 	"github.com/tomasen/realip"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	bip39 "github.com/cosmos/go-bip39"
+	"github.com/cosmos/go-bip39"
 
-	"github.com/terra-project/core/app"
-	core "github.com/terra-project/core/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	"github.com/terra-money/core/v2/app"
+	"github.com/terra-money/core/v2/app/params"
 
 	"github.com/PagerDuty/go-pagerduty"
-	"github.com/rs/cors"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	//"github.com/tendermint/tendermint/crypto"
+
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+
+	//"github.com/tendermint/tendermint/crypto/secp256k1"
+	"github.com/cosmos/cosmos-sdk/client"
+	txsigning "github.com/cosmos/cosmos-sdk/types/tx/signing"
 )
 
 var mnemonic string
@@ -43,12 +50,15 @@ var recaptchaKey string
 var port string
 var lcdURL string
 var chainID string
-var privKey crypto.PrivKey
+var privKey cryptotypes.PrivKey
+
+//var privKey crypto.PrivKey
 var address string
 var sequence uint64
 var accountNumber uint64
-var cdc *codec.Codec
+var cdc *params.EncodingConfig
 var mtx sync.Mutex
+var isClassic bool
 
 type PagerdutyConfig struct {
 	token     string
@@ -58,8 +68,19 @@ type PagerdutyConfig struct {
 
 var pagerdutyConfig PagerdutyConfig
 
+const ( // new core hasn't these yet.
+	MicroUnit              = int64(1e6)
+	fullFundraiserPath     = "m/44'/330'/0'/0/0"
+	accountAddresPrefix    = "terra"
+	accountPubKeyPrefix    = "terrapub"
+	validatorAddressPrefix = "terravaloper"
+	validatorPubKeyPrefix  = "terravaloperpub"
+	consNodeAddressPrefix  = "terravalcons"
+	consNodePubKeyPrefix   = "terravalconspub"
+)
+
 var amountTable = map[string]int64{
-	core.MicroLunaDenom: 5 * core.MicroUnit,
+	app.BondDenom: 5 * MicroUnit,
 }
 
 const (
@@ -87,23 +108,24 @@ type Coin struct {
 	Amount int64  `json:"amount"`
 }
 
-func newCodec() *codec.Codec {
-	cdc := app.MakeCodec()
+func newCodec() *params.EncodingConfig {
+	ec := app.MakeEncodingConfig()
 
 	config := sdk.GetConfig()
-	config.SetCoinType(core.CoinType)
-	config.SetFullFundraiserPath(core.FullFundraiserPath)
-	config.SetBech32PrefixForAccount(core.Bech32PrefixAccAddr, core.Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(core.Bech32PrefixValAddr, core.Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(core.Bech32PrefixConsAddr, core.Bech32PrefixConsPub)
+	config.SetCoinType(app.CoinType)
+	config.SetFullFundraiserPath(fullFundraiserPath)
+	config.SetBech32PrefixForAccount(accountAddresPrefix, accountPubKeyPrefix)
+	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
+	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
+	config.SetPurpose(44)
 	config.Seal()
 
-	return cdc
+	return &ec
 }
 
 func loadAccountInfo() {
 	// Query current faucet sequence
-	url := fmt.Sprintf("%v/auth/accounts/%v", lcdURL, address)
+	url := fmt.Sprintf("%v/cosmos/auth/v1beta1/accounts/%v", lcdURL, address)
 	response, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -122,7 +144,7 @@ func loadAccountInfo() {
 	var seq uint64
 
 	if strings.Contains(bodyStr, `"sequence"`) {
-		seq, _ = strconv.ParseUint(parseRegexp(`"sequence":"?(\d+)"?`, bodyStr), 10, 64)
+		seq, _ = strconv.ParseUint(parseRegexp(`"sequence": "?(\d+)"?`, bodyStr), 10, 64)
 	} else {
 		seq = 0
 	}
@@ -130,7 +152,7 @@ func loadAccountInfo() {
 	sequence = atomic.LoadUint64(&seq)
 
 	if strings.Contains(bodyStr, `"account_number"`) {
-		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number":"?(\d+)"?`, bodyStr), 10, 64)
+		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number": "?(\d+)"?`, bodyStr), 10, 64)
 	} else {
 		accountNumber = 0
 	}
@@ -174,7 +196,8 @@ func parseRegexp(regexpStr string, target string) (data string) {
 	groups := r.FindStringSubmatch(string(target))
 
 	if len(groups) != 2 {
-		fmt.Printf("cannot find data")
+		fmt.Println("cannot find data")
+		fmt.Println(target)
 		os.Exit(1)
 	}
 
@@ -256,35 +279,27 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 	return nil
 }
 
-func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
-	data := strings.TrimSpace(fmt.Sprintf(`{
-		"type": "core/StdTx",
-		"value": {
-			"msg": [{
-				"type": "bank/MsgSend",
-				"value": {
-					"from_address": "%v",
-					"to_address": "%v",
-					"amount": [{
-						"denom": "%v",
-						"amount": "%v"
-					}]
-				}
-			}],
-			"fee": {
-				"amount": [{
-					"denom": "ukrw",
-					"amount": "25500000"
-				}],
-				"gas": "150000"
-			},
-			"signatures": [],
-			"memo": "%v",
-			"timeout_height": "0"
-		}
-	}`, address, encodedAddress, denom, amount, "faucet"))
+func drip(encodedAddress string, denom string, amount int64, isDetectMismatch, isClassic bool) string {
+	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
-	return signAndBroadcast([]byte(data), isDetectMismatch)
+	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(1_000_000))))
+	builder.SetGasLimit(150_000)
+	builder.SetMemo("faucet")
+	builder.SetTimeoutHeight(0)
+
+	coins := sdk.NewCoins(sdk.NewCoin(denom, sdk.NewInt(amount)))
+	from, err := sdk.AccAddressFromBech32(address)
+	if err != nil {
+		panic("invalid from address")
+	}
+	to, err := sdk.AccAddressFromBech32(encodedAddress)
+	if err != nil {
+		panic("invalid to address")
+	}
+	sendMsg := banktypes.NewMsgSend(from, to, coins)
+	builder.SetMsgs(sendMsg)
+
+	return signAndBroadcast(builder, isDetectMismatch)
 }
 
 func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
@@ -293,6 +308,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				http.Error(w, err.(error).Error(), 400)
+				fmt.Println(string(debug.Stack()))
 			}
 		}()
 
@@ -339,35 +355,35 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 		// send the coins!
 		if captchaPassed {
-      mtx.Lock()
-      defer mtx.Unlock()
+			mtx.Lock()
+			defer mtx.Unlock()
 
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), "req", clientIP, encodedAddress, amount, claim.Denom)
-			body := drip(encodedAddress, claim.Denom, amount, true)
+			body := drip(encodedAddress, claim.Denom, amount, true, isClassic)
 
 			// Sequence mismatch if the body length is zero
 			if len(body) == 0 {
 				// Reload for self healing and re-drip
 				loadAccountInfo()
-				body = drip(encodedAddress, claim.Denom, amount, true)
+				body = drip(encodedAddress, claim.Denom, amount, true, isClassic)
 
 				// Another try without loading....
 				if len(body) == 0 {
 					atomic.AddUint64(&sequence, 1)
-					body = drip(encodedAddress, claim.Denom, amount, false)
+					body = drip(encodedAddress, claim.Denom, amount, false, isClassic)
 				}
 			}
 
-      if len(body) != 0 {
-        atomic.AddUint64(&sequence, 1)
-      }
+			if len(body) != 0 {
+				atomic.AddUint64(&sequence, 1)
+			}
 
-      fmt.Printf("%v seq %v %v\n", time.Now().UTC().Format(time.RFC3339), sequence, body)
+			fmt.Printf("%v seq %v %v\n", time.Now().UTC().Format(time.RFC3339), sequence, body)
 
-      // Create an incident for broadcast error
-      if strings.Contains(body, "code") {
-        createIncident(body)
-      }
+			// Create an incident for broadcast error
+			if strings.Contains(body, "code") {
+				createIncident(body)
+			}
 
 			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"amount": %v, "response": %v}`, amount, body)
@@ -380,44 +396,75 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 
 // BroadcastReq defines a tx broadcasting request.
 type BroadcastReq struct {
-	Tx         auth.StdTx `json:"tx"`
-	Mode       string     `json:"mode"`
-	Sequences  []uint64   `json:"sequences" yaml:"sequences"`
-	FeeGranter string     `json:"fee_granter" yaml:"fee_granter"`
+	Tx   string `json:"tx_bytes"`
+	Mode string `json:"mode"`
 }
 
-func signAndBroadcast(txJSON []byte, isDetectMismatch bool) string {
+func signAndBroadcast(txBuilder client.TxBuilder, isDetectMismatch bool) string {
 	var broadcastReq BroadcastReq
-	var stdTx auth.StdTx
 
-	cdc.MustUnmarshalJSON(txJSON, &stdTx)
+	pubKey := privKey.PubKey()
 
-	// Sort denom
-	for _, msg := range stdTx.Msgs {
-		msg, ok := msg.(bank.MsgSend)
-		if ok {
-			msg.Amount.Sort()
-		}
+	// no need to sort amount because there's only one amount.
+
+	// create signature v2
+	signMode := cdc.TxConfig.SignModeHandler().DefaultMode()
+
+	signerData := signing.SignerData{
+		ChainID:       chainID,
+		AccountNumber: accountNumber,
+		Sequence:      sequence,
 	}
-
-	signBytes := auth.StdSignBytes(chainID, accountNumber, sequence, stdTx.Fee, stdTx.Msgs, stdTx.Memo)
-	sig, err := privKey.Sign(signBytes)
+	sigData := txsigning.SingleSignatureData{
+		SignMode:  signMode,
+		Signature: nil,
+	}
+	sigv2 := txsigning.SignatureV2{
+		PubKey:   pubKey,
+		Data:     &sigData,
+		Sequence: sequence,
+	}
+	txBuilder.SetSignatures(sigv2)
+	bytesToSign, err := cdc.TxConfig.SignModeHandler().GetSignBytes(signMode, signerData, txBuilder.GetTx())
 	if err != nil {
 		panic(err)
 	}
 
-	sigs := []auth.StdSignature{{
-		PubKey:    privKey.PubKey(),
-		Signature: sig}}
-	tx := auth.NewStdTx(stdTx.Msgs, stdTx.Fee, sigs, stdTx.Memo)
-	broadcastReq.Tx = tx
-	broadcastReq.Mode = "sync"
-	broadcastReq.Sequences = []uint64{sequence}
+	sig, err := privKey.Sign(bytesToSign)
+	if err != nil {
+		panic(err)
+	}
 
-	bz := cdc.MustMarshalJSON(broadcastReq)
+	sigData = txsigning.SingleSignatureData{
+		SignMode:  signMode,
+		Signature: sig,
+	}
+	sigv2 = txsigning.SignatureV2{
+		PubKey:   pubKey,
+		Data:     &sigData,
+		Sequence: sequence,
+	}
 
-	url := fmt.Sprintf("%v/txs", lcdURL)
-	response, err := http.Post(url, "application/json", bytes.NewReader(bz))
+	txBuilder.SetSignatures(sigv2)
+
+	// encode signed tx
+	bz, err := cdc.TxConfig.TxEncoder()(txBuilder.GetTx())
+	if err != nil {
+		panic(err)
+	}
+
+	// prepare to broacast
+	broadcastReq.Tx = base64.StdEncoding.EncodeToString(bz)
+	broadcastReq.Mode = "BROADCAST_MODE_SYNC"
+
+	txBz, err := json.Marshal(broadcastReq)
+	if err != nil {
+		panic(err)
+	}
+
+	// broadcast
+	url := fmt.Sprintf("%v/cosmos/tx/v1beta1/txs", lcdURL)
+	response, err := http.Post(url, "application/json", bytes.NewReader(txBz))
 	if err != nil {
 		panic(err)
 	}
@@ -433,7 +480,16 @@ func signAndBroadcast(txJSON []byte, isDetectMismatch bool) string {
 
 	if response.StatusCode != 200 {
 		err := fmt.Errorf("status: %v, message: %v", response.Status, stringBody)
+		fmt.Printf("failed to broadcast: %v\n", err)
 		panic(err)
+	}
+
+	code, err := strconv.ParseUint(parseRegexp(`"code": ?(\d+)?`, stringBody), 10, 64)
+	if err != nil {
+		panic("failed to parse code from tx response")
+	}
+	if code != 0 {
+		panic(parseRegexp(`"raw_log": "?(\d+)"?`, stringBody))
 	}
 
 	if isDetectMismatch && strings.Contains(stringBody, "sequence mismatch") {
@@ -466,6 +522,9 @@ func main() {
 	if mnemonic == "" {
 		panic("MNEMONIC variable is required")
 	}
+	if !bip39.IsMnemonicValid(mnemonic) {
+		panic("invalid mnemonic")
+	}
 
 	recaptchaKey = os.Getenv(recaptchaKeyVar)
 
@@ -490,6 +549,11 @@ func main() {
 	if chainID == "" {
 		panic("CHAIN_ID variable is required")
 	}
+	if strings.HasPrefix(chainID, "bombay") {
+		isClassic = true
+	} else {
+		isClassic = false
+	}
 
 	pagerdutyConfig.token = os.Getenv(pagerdutyTokenVar)
 	pagerdutyConfig.user = os.Getenv(pagerdutyUserVar)
@@ -507,20 +571,17 @@ func main() {
 
 	cdc = newCodec()
 
-	seed := bip39.NewSeed(mnemonic, "")
-	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
-	derivedPriv, err := hd.DerivePrivateKeyForPath(masterPriv, ch, core.FullFundraiserPath)
+	derivedPriv, err := hd.Secp256k1.Derive()(mnemonic, "", fullFundraiserPath)
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		panic(err)
 	}
 
-	privKey = secp256k1.PrivKeySecp256k1(derivedPriv)
+	//privKey = *secp256k1.GenPrivKeyFromSecret(derivedPriv)
+	privKey = hd.Secp256k1.Generate()(derivedPriv)
 	pubk := privKey.PubKey()
 	address, err = bech32.ConvertAndEncode("terra", pubk.Address())
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		panic(err)
 	}
 
 	// Load account number and sequence
@@ -535,7 +596,7 @@ func main() {
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://faucet.terra.money"},
+		AllowedOrigins:   []string{"https://faucet.terra.money", "http://localhost", "localhost", "http://localhost:3000", "http://localhost:8080"},
 		AllowCredentials: true,
 	})
 
