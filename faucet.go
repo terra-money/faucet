@@ -116,7 +116,6 @@ func newCodec() *params.EncodingConfig {
 	config.SetBech32PrefixForAccount(accountAddresPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
-	config.SetPurpose(44)
 	config.Seal()
 
 	return &ec
