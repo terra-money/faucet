@@ -475,7 +475,6 @@ func signAndBroadcast(txBuilder client.TxBuilder, isDetectMismatch bool) string 
 
 	if response.StatusCode != 200 {
 		err := fmt.Errorf("status: %v, message: %v", response.Status, stringBody)
-		fmt.Printf("failed to broadcast: %v\n", err)
 		panic(err)
 	}
 
