@@ -276,7 +276,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 	return nil
 }
 
-func drip(encodedAddress string, denom string, amount int64, isDetectMismatch, isClassic bool) string {
+func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
 	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
 	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(1_000_000))))
@@ -355,18 +355,18 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			defer mtx.Unlock()
 
 			fmt.Println(time.Now().UTC().Format(time.RFC3339), "req", clientIP, encodedAddress, amount, claim.Denom)
-			body := drip(encodedAddress, claim.Denom, amount, true, isClassic)
+			body := drip(encodedAddress, claim.Denom, amount, true)
 
 			// Sequence mismatch if the body length is zero
 			if len(body) == 0 {
 				// Reload for self healing and re-drip
 				loadAccountInfo()
-				body = drip(encodedAddress, claim.Denom, amount, true, isClassic)
+				body = drip(encodedAddress, claim.Denom, amount, true)
 
 				// Another try without loading....
 				if len(body) == 0 {
 					atomic.AddUint64(&sequence, 1)
-					body = drip(encodedAddress, claim.Denom, amount, false, isClassic)
+					body = drip(encodedAddress, claim.Denom, amount, false)
 				}
 			}
 
