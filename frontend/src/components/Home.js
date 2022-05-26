@@ -78,7 +78,8 @@ class HomeComponent extends React.Component {
         response: this.state.response,
       })
       .then((res) => {
-        const { amount, response } = res.data;
+        const { amount } = res.data;
+        const response = res.data.response['tx_response'] || res.data.response;
 
         if (response.code) {
           toast.error(`Error: ${response.raw_log || `code: ${response.code}`}`);
