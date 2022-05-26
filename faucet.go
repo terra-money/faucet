@@ -278,7 +278,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
 	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
-	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(1_000_000))))
+	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(200_000))))
 	builder.SetGasLimit(150_000)
 	builder.SetMemo("faucet")
 	builder.SetTimeoutHeight(0)
