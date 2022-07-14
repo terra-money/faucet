@@ -376,7 +376,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			fmt.Printf("%v seq %v %v\n", time.Now().UTC().Format(time.RFC3339), sequence, body)
 
 			// Create an incident for broadcast error
-			if strings.Contains(body, "code") {
+			if !strings.Contains(body, "\"code\": 0") {
 				createIncident(body)
 			}
 
