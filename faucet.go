@@ -278,7 +278,11 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
 	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
+<<<<<<< HEAD
 	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(200_000))))
+=======
+	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(1_000_000))))
+>>>>>>> v2
 	builder.SetGasLimit(150_000)
 	builder.SetMemo("faucet")
 	builder.SetTimeoutHeight(0)
@@ -376,8 +380,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			fmt.Printf("%v seq %v %v\n", time.Now().UTC().Format(time.RFC3339), sequence, body)
 
 			// Create an incident for broadcast error
-			if (isClassic && strings.Contains(body, "code")) ||
-				(!isClassic && !strings.Contains(body, "\"code\": 0")) {
+			if !strings.Contains(body, "\"code\": 0") {
 				createIncident(body)
 			}
 
