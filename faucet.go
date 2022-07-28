@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -32,7 +31,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/mars-protocol/faucet/params"
 
-	"github.com/PagerDuty/go-pagerduty"
 	//"github.com/tendermint/tendermint/crypto"
 
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -382,7 +380,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			// Create an incident for broadcast error
 			if (isClassic && strings.Contains(body, "code")) ||
 				(!isClassic && !strings.Contains(body, "\"code\": 0")) {
-				createIncident(body)
+				// createIncident(body)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -498,22 +496,22 @@ func signAndBroadcast(txBuilder client.TxBuilder, isDetectMismatch bool) string 
 	return stringBody
 }
 
-func createIncident(body string) (*pagerduty.Incident, error) {
-	client := pagerduty.NewClient(pagerdutyConfig.token)
-	input := &pagerduty.CreateIncidentOptions{
-		Title:   "Faucet had an error",
-		Urgency: "low",
-		Service: &pagerduty.APIReference{
-			ID:   pagerdutyConfig.serviceID,
-			Type: "service",
-		},
-		Body: &pagerduty.APIDetails{
-			Details: body,
-		},
-	}
+// func createIncident(body string) (*pagerduty.Incident, error) {
+// 	client := pagerduty.NewClient(pagerdutyConfig.token)
+// 	input := &pagerduty.CreateIncidentOptions{
+// 		Title:   "Faucet had an error",
+// 		Urgency: "low",
+// 		Service: &pagerduty.APIReference{
+// 			ID:   pagerdutyConfig.serviceID,
+// 			Type: "service",
+// 		},
+// 		Body: &pagerduty.APIDetails{
+// 			Details: body,
+// 		},
+// 	}
 
-	return client.CreateIncidentWithContext(context.Background(), pagerdutyConfig.user, input)
-}
+// 	return client.CreateIncidentWithContext(context.Background(), pagerdutyConfig.user, input)
+// }
 
 func main() {
 	mnemonic = os.Getenv(mnemonicVar)
@@ -554,13 +552,13 @@ func main() {
 		isClassic = false
 	}
 
-	pagerdutyConfig.token = os.Getenv(pagerdutyTokenVar)
-	pagerdutyConfig.user = os.Getenv(pagerdutyUserVar)
-	pagerdutyConfig.serviceID = os.Getenv(pagerdutyServiceIDVar)
+	// pagerdutyConfig.token = os.Getenv(pagerdutyTokenVar)
+	// pagerdutyConfig.user = os.Getenv(pagerdutyUserVar)
+	// pagerdutyConfig.serviceID = os.Getenv(pagerdutyServiceIDVar)
 
-	if pagerdutyConfig.token == "" || pagerdutyConfig.user == "" || pagerdutyConfig.serviceID == "" {
-		panic("PAGERDUTY_TOKEN, PAGERDUTY_USER, and PAGERDUTY_SERVICE_ID variables are required")
-	}
+	// if pagerdutyConfig.token == "" || pagerdutyConfig.user == "" || pagerdutyConfig.serviceID == "" {
+	// 	panic("PAGERDUTY_TOKEN, PAGERDUTY_USER, and PAGERDUTY_SERVICE_ID variables are required")
+	// }
 
 	db, err := leveldb.OpenFile("db/ipdb", nil)
 	if err != nil {
