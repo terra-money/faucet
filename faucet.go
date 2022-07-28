@@ -30,8 +30,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/terra-money/core/v2/app"
-	"github.com/terra-money/core/v2/app/params"
+	"github.com/mars-protocol/faucet/params"
 
 	"github.com/PagerDuty/go-pagerduty"
 	//"github.com/tendermint/tendermint/crypto"
@@ -69,17 +68,22 @@ var pagerdutyConfig PagerdutyConfig
 
 const ( // new core hasn't these yet.
 	MicroUnit              = int64(1e6)
-	fullFundraiserPath     = "m/44'/330'/0'/0/0"
-	accountAddresPrefix    = "terra"
-	accountPubKeyPrefix    = "terrapub"
-	validatorAddressPrefix = "terravaloper"
-	validatorPubKeyPrefix  = "terravaloperpub"
-	consNodeAddressPrefix  = "terravalcons"
-	consNodePubKeyPrefix   = "terravalconspub"
+	fullFundraiserPath     = "m/44'/118'/0'/0/0"
+	accountAddressPrefix   = "mars"
+	accountPubKeyPrefix    = "marspub"
+	validatorAddressPrefix = "marsvaloper"
+	validatorPubKeyPrefix  = "marsvaloperpub"
+	consNodeAddressPrefix  = "marsvalcons"
+	consNodePubKeyPrefix   = "marsvalconspub"
+
+	CoinType    = 118
+	CoinPurpose = 44
+	// BondDenom staking denom
+	BondDenom = "umars"
 )
 
 var amountTable = map[string]int64{
-	app.BondDenom: 5 * MicroUnit,
+	BondDenom: 5 * MicroUnit,
 }
 
 const (
@@ -108,12 +112,12 @@ type Coin struct {
 }
 
 func newCodec() *params.EncodingConfig {
-	ec := app.MakeEncodingConfig()
+	ec := params.MakeEncodingConfig()
 
 	config := sdk.GetConfig()
-	config.SetCoinType(app.CoinType)
+	config.SetCoinType(CoinType)
 	config.SetFullFundraiserPath(fullFundraiserPath)
-	config.SetBech32PrefixForAccount(accountAddresPrefix, accountPubKeyPrefix)
+	config.SetBech32PrefixForAccount(accountAddressPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
 	config.Seal()
@@ -168,7 +172,7 @@ type BalanceResponse struct {
 }
 
 func getBalance(address string) (amount int64) {
-	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=uluna", lcdURL, address)
+	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=umars", lcdURL, address)
 	response, err := http.Get(url)
 
 	if err != nil {
@@ -229,7 +233,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 }
 
 func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
-	address, _ := bech32.ConvertAndEncode("terra", account)
+	address, _ := bech32.ConvertAndEncode(accountAddressPrefix, account)
 
 	if getBalance(address) >= amountTable[denom]*2 {
 		return errors.New("amount limit exceeded")
@@ -276,9 +280,9 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 }
 
 func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
-	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
+	builder := params.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
-	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(200_000))))
+	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(BondDenom, sdk.NewInt(200_000))))
 	builder.SetGasLimit(150_000)
 	builder.SetMemo("faucet")
 	builder.SetTimeoutHeight(0)
@@ -574,7 +578,7 @@ func main() {
 	//privKey = *secp256k1.GenPrivKeyFromSecret(derivedPriv)
 	privKey = hd.Secp256k1.Generate()(derivedPriv)
 	pubk := privKey.PubKey()
-	address, err = bech32.ConvertAndEncode("terra", pubk.Address())
+	address, err = bech32.ConvertAndEncode(accountAddressPrefix, pubk.Address())
 	if err != nil {
 		panic(err)
 	}
@@ -591,7 +595,7 @@ func main() {
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://faucet.terra.money", "http://localhost", "localhost", "http://localhost:3000", "http://localhost:8080"},
+		AllowedOrigins:   []string{"https://faucet.marsprotocol.io", "http://localhost", "localhost", "http://localhost:3000", "http://localhost:8080"},
 		AllowCredentials: true,
 	})
 
