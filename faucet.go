@@ -67,7 +67,6 @@ var pagerdutyConfig PagerdutyConfig
 const ( // new core hasn't these yet.
 	MicroUnit              = int64(1e6)
 	fullFundraiserPath     = "m/44'/118'/0'/0/0"
-	accountAddressPrefix   = "mars"
 	accountPubKeyPrefix    = "marspub"
 	validatorAddressPrefix = "marsvaloper"
 	validatorPubKeyPrefix  = "marsvaloperpub"
@@ -76,12 +75,10 @@ const ( // new core hasn't these yet.
 
 	CoinType    = 118
 	CoinPurpose = 44
-	// BondDenom staking denom
-	BondDenom = "umars"
 )
 
 var amountTable = map[string]int64{
-	BondDenom: 5 * MicroUnit,
+	app.BondDenom: 5 * MicroUnit,
 }
 
 const (
@@ -115,7 +112,7 @@ func newCodec() *app.EncodingConfig {
 	config := sdk.GetConfig()
 	config.SetCoinType(CoinType)
 	config.SetFullFundraiserPath(fullFundraiserPath)
-	config.SetBech32PrefixForAccount(accountAddressPrefix, accountPubKeyPrefix)
+	config.SetBech32PrefixForAccount(app.AccountAddressPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
 	config.Seal()
@@ -231,7 +228,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 }
 
 func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
-	address, _ := bech32.ConvertAndEncode(accountAddressPrefix, account)
+	address, _ := bech32.ConvertAndEncode(app.AccountAddressPrefix, account)
 
 	if getBalance(address) >= amountTable[denom]*2 {
 		return errors.New("amount limit exceeded")
@@ -280,7 +277,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
 	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
-	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(BondDenom, sdk.NewInt(200_000))))
+	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(app.BondDenom, sdk.NewInt(200_000))))
 	builder.SetGasLimit(150_000)
 	builder.SetMemo("faucet")
 	builder.SetTimeoutHeight(0)
@@ -576,7 +573,7 @@ func main() {
 	//privKey = *secp256k1.GenPrivKeyFromSecret(derivedPriv)
 	privKey = hd.Secp256k1.Generate()(derivedPriv)
 	pubk := privKey.PubKey()
-	address, err = bech32.ConvertAndEncode(accountAddressPrefix, pubk.Address())
+	address, err = bech32.ConvertAndEncode(app.AccountAddressPrefix, pubk.Address())
 	if err != nil {
 		panic(err)
 	}

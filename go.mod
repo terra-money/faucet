@@ -11,7 +11,7 @@ require (
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 )
 
-require github.com/mars-protocol/hub v0.3.0
+require github.com/mars-protocol/hub v0.3.1-0.20220729112722-5eb26302567d
 
 require (
 	filippo.io/edwards25519 v1.0.0-beta.2 // indirect
