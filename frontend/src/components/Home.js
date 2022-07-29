@@ -205,7 +205,11 @@ class HomeComponent extends React.Component {
           <article>
             There's two ways to get one. The first is by using Station, the
             crypto wallet for Terra. If you know command-line-fu, you can also
-            generate an address with the Mars SDK.
+            generate an address with the{' '}
+            <a href="https://github.com/mars-protocol/hub">
+              Mars daemon application (marsd)
+            </a>
+            .
           </article>
           <div className="buttonContainer">
             <button className="light">
