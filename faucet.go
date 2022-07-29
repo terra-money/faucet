@@ -29,7 +29,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/mars-protocol/faucet/params"
+	"github.com/mars-protocol/hub/app"
 
 	//"github.com/tendermint/tendermint/crypto"
 
@@ -52,7 +52,7 @@ var privKey cryptotypes.PrivKey
 var address string
 var sequence uint64
 var accountNumber uint64
-var cdc *params.EncodingConfig
+var cdc *app.EncodingConfig
 var mtx sync.Mutex
 var isClassic bool
 
@@ -109,8 +109,8 @@ type Coin struct {
 	Amount int64  `json:"amount"`
 }
 
-func newCodec() *params.EncodingConfig {
-	ec := params.MakeEncodingConfig()
+func newCodec() *app.EncodingConfig {
+	ec := app.MakeEncodingConfig()
 
 	config := sdk.GetConfig()
 	config.SetCoinType(CoinType)
@@ -278,7 +278,7 @@ func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 }
 
 func drip(encodedAddress string, denom string, amount int64, isDetectMismatch bool) string {
-	builder := params.MakeEncodingConfig().TxConfig.NewTxBuilder()
+	builder := app.MakeEncodingConfig().TxConfig.NewTxBuilder()
 
 	builder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(BondDenom, sdk.NewInt(200_000))))
 	builder.SetGasLimit(150_000)
