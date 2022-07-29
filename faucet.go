@@ -167,7 +167,7 @@ type BalanceResponse struct {
 }
 
 func getBalance(address string) (amount int64) {
-	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=umars", lcdURL, address)
+	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=%s", lcdURL, address, app.BondDenom)
 	response, err := http.Get(url)
 
 	if err != nil {
