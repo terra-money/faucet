@@ -16,7 +16,7 @@ import NetworkContext from '../contexts/NetworkContext';
 const validateWalletAddress = (str) => {
   try {
     const { prefix } = bech32.decode(str);
-    if (prefix !== 'terra') {
+    if (prefix !== 'mars') {
       throw new Error('Invalid address');
     }
   } catch {
@@ -30,7 +30,7 @@ const sendSchema = Yup.object().shape({
 });
 
 const DENUMS_TO_TOKEN = {
-  uluna: 'Luna',
+  umars: 'MARS',
 };
 
 const REQUEST_LIMIT_SECS = 30;
@@ -147,23 +147,23 @@ class HomeComponent extends React.Component {
           pauseOnHover
         />
         <section>
-          <h2>Terra Testnet Faucet</h2>
+          <h2>Mars Testnet Faucet</h2>
           <article>
             Hello intrepid spaceperson! Use this faucet to get tokens for the
-            latest Terra testnet. Please don't abuse this service—the number of
+            latest Mars testnet. Please don't abuse this service—the number of
             available tokens is limited.
           </article>
           <div className="recaptcha">
             <ReCAPTCHA
               ref={this.recaptchaRef}
-              sitekey="6Ld4w4cUAAAAAJceMYGpOTpjiJtMS_xvzOg643ix"
+              sitekey="6LdtqBQTAAAAAI-G1Zg2GqnYEoMWKAeq_GftuQI2"
               onChange={this.handleCaptcha}
             />
           </div>
           <Formik
             initialValues={{
               address: '',
-              denom: 'uluna',
+              denom: 'umars',
             }}
             validationSchema={sendSchema}
             onSubmit={this.handleSubmit}
@@ -180,7 +180,7 @@ class HomeComponent extends React.Component {
                     <div className="fieldError">{errors.address}</div>
                   ) : null}
                 </div>
-                <Field type="hidden" name="denom" value="uluna" />
+                <Field type="hidden" name="denom" value="umars" />
                 <div className="buttonContainer">
                   <button
                     disabled={!this.state.verified || this.state.sending}
@@ -205,7 +205,11 @@ class HomeComponent extends React.Component {
           <article>
             There's two ways to get one. The first is by using Station, the
             crypto wallet for Terra. If you know command-line-fu, you can also
-            generate an address with the Terra SDK.
+            generate an address with the{' '}
+            <a href="https://github.com/mars-protocol/hub">
+              Mars daemon application (marsd)
+            </a>
+            .
           </article>
           <div className="buttonContainer">
             <button className="light">

@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -30,10 +29,8 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/terra-money/core/v2/app"
-	"github.com/terra-money/core/v2/app/params"
+	"github.com/mars-protocol/hub/app"
 
-	"github.com/PagerDuty/go-pagerduty"
 	//"github.com/tendermint/tendermint/crypto"
 
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -55,7 +52,7 @@ var privKey cryptotypes.PrivKey
 var address string
 var sequence uint64
 var accountNumber uint64
-var cdc *params.EncodingConfig
+var cdc *app.EncodingConfig
 var mtx sync.Mutex
 var isClassic bool
 
@@ -69,13 +66,15 @@ var pagerdutyConfig PagerdutyConfig
 
 const ( // new core hasn't these yet.
 	MicroUnit              = int64(1e6)
-	fullFundraiserPath     = "m/44'/330'/0'/0/0"
-	accountAddresPrefix    = "terra"
-	accountPubKeyPrefix    = "terrapub"
-	validatorAddressPrefix = "terravaloper"
-	validatorPubKeyPrefix  = "terravaloperpub"
-	consNodeAddressPrefix  = "terravalcons"
-	consNodePubKeyPrefix   = "terravalconspub"
+	fullFundraiserPath     = "m/44'/118'/0'/0/0"
+	accountPubKeyPrefix    = "marspub"
+	validatorAddressPrefix = "marsvaloper"
+	validatorPubKeyPrefix  = "marsvaloperpub"
+	consNodeAddressPrefix  = "marsvalcons"
+	consNodePubKeyPrefix   = "marsvalconspub"
+
+	CoinType    = 118
+	CoinPurpose = 44
 )
 
 var amountTable = map[string]int64{
@@ -107,13 +106,13 @@ type Coin struct {
 	Amount int64  `json:"amount"`
 }
 
-func newCodec() *params.EncodingConfig {
+func newCodec() *app.EncodingConfig {
 	ec := app.MakeEncodingConfig()
 
 	config := sdk.GetConfig()
-	config.SetCoinType(app.CoinType)
+	config.SetCoinType(CoinType)
 	config.SetFullFundraiserPath(fullFundraiserPath)
-	config.SetBech32PrefixForAccount(accountAddresPrefix, accountPubKeyPrefix)
+	config.SetBech32PrefixForAccount(app.AccountAddressPrefix, accountPubKeyPrefix)
 	config.SetBech32PrefixForValidator(validatorAddressPrefix, validatorPubKeyPrefix)
 	config.SetBech32PrefixForConsensusNode(consNodeAddressPrefix, consNodePubKeyPrefix)
 	config.Seal()
@@ -168,7 +167,7 @@ type BalanceResponse struct {
 }
 
 func getBalance(address string) (amount int64) {
-	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=uluna", lcdURL, address)
+	url := fmt.Sprintf("%v/cosmos/bank/v1beta1/balances/%v/by_denom?denom=%s", lcdURL, address, app.BondDenom)
 	response, err := http.Get(url)
 
 	if err != nil {
@@ -229,7 +228,7 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 }
 
 func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
-	address, _ := bech32.ConvertAndEncode("terra", account)
+	address, _ := bech32.ConvertAndEncode(app.AccountAddressPrefix, account)
 
 	if getBalance(address) >= amountTable[denom]*2 {
 		return errors.New("amount limit exceeded")
@@ -378,7 +377,7 @@ func createGetCoinsHandler(db *leveldb.DB) http.HandlerFunc {
 			// Create an incident for broadcast error
 			if (isClassic && strings.Contains(body, "code")) ||
 				(!isClassic && !strings.Contains(body, "\"code\": 0")) {
-				createIncident(body)
+				// createIncident(body)
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -494,22 +493,22 @@ func signAndBroadcast(txBuilder client.TxBuilder, isDetectMismatch bool) string 
 	return stringBody
 }
 
-func createIncident(body string) (*pagerduty.Incident, error) {
-	client := pagerduty.NewClient(pagerdutyConfig.token)
-	input := &pagerduty.CreateIncidentOptions{
-		Title:   "Faucet had an error",
-		Urgency: "low",
-		Service: &pagerduty.APIReference{
-			ID:   pagerdutyConfig.serviceID,
-			Type: "service",
-		},
-		Body: &pagerduty.APIDetails{
-			Details: body,
-		},
-	}
+// func createIncident(body string) (*pagerduty.Incident, error) {
+// 	client := pagerduty.NewClient(pagerdutyConfig.token)
+// 	input := &pagerduty.CreateIncidentOptions{
+// 		Title:   "Faucet had an error",
+// 		Urgency: "low",
+// 		Service: &pagerduty.APIReference{
+// 			ID:   pagerdutyConfig.serviceID,
+// 			Type: "service",
+// 		},
+// 		Body: &pagerduty.APIDetails{
+// 			Details: body,
+// 		},
+// 	}
 
-	return client.CreateIncidentWithContext(context.Background(), pagerdutyConfig.user, input)
-}
+// 	return client.CreateIncidentWithContext(context.Background(), pagerdutyConfig.user, input)
+// }
 
 func main() {
 	mnemonic = os.Getenv(mnemonicVar)
@@ -550,13 +549,13 @@ func main() {
 		isClassic = false
 	}
 
-	pagerdutyConfig.token = os.Getenv(pagerdutyTokenVar)
-	pagerdutyConfig.user = os.Getenv(pagerdutyUserVar)
-	pagerdutyConfig.serviceID = os.Getenv(pagerdutyServiceIDVar)
+	// pagerdutyConfig.token = os.Getenv(pagerdutyTokenVar)
+	// pagerdutyConfig.user = os.Getenv(pagerdutyUserVar)
+	// pagerdutyConfig.serviceID = os.Getenv(pagerdutyServiceIDVar)
 
-	if pagerdutyConfig.token == "" || pagerdutyConfig.user == "" || pagerdutyConfig.serviceID == "" {
-		panic("PAGERDUTY_TOKEN, PAGERDUTY_USER, and PAGERDUTY_SERVICE_ID variables are required")
-	}
+	// if pagerdutyConfig.token == "" || pagerdutyConfig.user == "" || pagerdutyConfig.serviceID == "" {
+	// 	panic("PAGERDUTY_TOKEN, PAGERDUTY_USER, and PAGERDUTY_SERVICE_ID variables are required")
+	// }
 
 	db, err := leveldb.OpenFile("db/ipdb", nil)
 	if err != nil {
@@ -574,7 +573,7 @@ func main() {
 	//privKey = *secp256k1.GenPrivKeyFromSecret(derivedPriv)
 	privKey = hd.Secp256k1.Generate()(derivedPriv)
 	pubk := privKey.PubKey()
-	address, err = bech32.ConvertAndEncode("terra", pubk.Address())
+	address, err = bech32.ConvertAndEncode(app.AccountAddressPrefix, pubk.Address())
 	if err != nil {
 		panic(err)
 	}
@@ -591,7 +590,7 @@ func main() {
 	mux.HandleFunc("/claim", createGetCoinsHandler(db))
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://faucet.terra.money", "http://localhost", "localhost", "http://localhost:3000", "http://localhost:8080"},
+		AllowedOrigins:   []string{"https://faucet.marsprotocol.io", "http://localhost", "localhost", "http://localhost:3000", "http://localhost:8080"},
 		AllowCredentials: true,
 	})
 
