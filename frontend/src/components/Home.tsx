@@ -28,11 +28,8 @@ const Home = () => {
     }
 
     const handleSubmit = () => {
-        const faucetUrl = 'https://faucet.marsprotocol.io/'
-
+        const faucetUrl = 'https://faucet.marsprotocol.io/claim'
         setSending(true)
-
-        //this.recaptchaRef.current.reset()
         axios
             .post(faucetUrl, {
                 address: address,
