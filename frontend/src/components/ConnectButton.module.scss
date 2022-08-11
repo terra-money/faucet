@@ -1,0 +1,275 @@
+@use '../styles/master' as *;
+
+.button {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    flex-wrap: nowrap;
+    border-radius: rem-calc(20);
+    height: rem-calc(31);
+    @include padding(0, 4);
+    @include typoButton;
+    cursor: pointer;
+    color: $colorWhite;
+    outline: none;
+    background-color: $colorSecondaryAlpha;
+    border: 1px solid $alphaWhite60;
+
+    &.connect {
+        height: rem-calc(31);
+        font-weight: $fontWeightRegular;
+
+        svg {
+            @include margin(-0.25, 2, 0, 0);
+            height: rem-calc(14);
+            width: auto;
+        }
+    }
+
+    &:hover,
+    &:focus {
+        border: 1px solid $fontColorLightPrimary;
+        background-color: $colorSecondaryDark;
+    }
+
+    &:active {
+        border: 1px solid $fontColorLightPrimary;
+        background-color: lighten($colorSecondaryDark, 10%);
+    }
+
+    svg {
+        @include margin(0, 1, 0, 0);
+        height: rem-calc(16);
+        width: auto;
+    }
+
+    .walletIcon {
+        display: grid;
+        place-content: center;
+
+        img,
+        svg {
+            margin-top: rem-calc(-1);
+            height: rem-calc(14);
+            width: auto;
+        }
+    }
+
+    .address {
+        margin-inline-start: space(1.5);
+        font-weight: $fontWeightRegular;
+    }
+
+    .balance {
+        font-weight: $fontWeightRegular;
+        position: relative;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        margin-inline-start: space(2);
+        padding-inline-start: rem-calc(8);
+        &:before {
+            content: '';
+            position: absolute;
+            top: space(1.5);
+            bottom: space(1.5);
+            height: calc(100% - 12px);
+            left: 0;
+            border-left: 1px solid $fontColorLightPrimary;
+        }
+    }
+
+    &:hover,
+    &:focus {
+        border: 1px solid $fontColorLightPrimary;
+        background-color: $colorSecondaryDark;
+    }
+
+    &:active {
+        border: 1px solid $fontColorLightPrimary;
+        background-color: lighten($colorSecondaryDark, 10%);
+    }
+}
+
+.details {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    justify-content: flex-start;
+    top: rem-calc(43);
+    @include padding(6, 6, 5.5);
+    @include layoutPopover;
+    width: rem-calc(420);
+    right: 0;
+    z-index: 100;
+}
+
+.detailsHeader {
+    display: flex;
+    flex: 0;
+    flex-wrap: nowrap;
+    width: 100%;
+    @include margin(0, 0, 4);
+}
+
+.detailsDenom {
+    @include margin(0, 2, 0, 0);
+    @include typoMcaps;
+}
+
+.detailsBalance {
+    display: flex;
+    flex: 1;
+    width: auto;
+    align-items: center;
+
+    svg {
+        @include margin(-1, 4, 0, 0);
+        height: space(6);
+        width: auto;
+    }
+
+    p {
+        @include margin(0);
+        @include typoH4;
+        color: $colorSecondaryDark;
+    }
+}
+
+.detailsButton {
+    display: flex;
+    flex: 0 0 rem-calc(116);
+    width: rem-calc(116);
+}
+
+.detailsBody {
+    flex: 0;
+    width: 100%;
+
+    .address,
+    .addressMobile,
+    .addressLabel {
+        color: $colorSecondaryDark;
+        opacity: 1;
+        @include margin(0, 0, 1);
+        @include typoS;
+        word-break: break-all;
+    }
+
+    .address,
+    .addressMobile {
+        font-weight: $fontWeightSemibold;
+    }
+
+    .addressLabel {
+        @include typoScaps;
+        font-weight: $fontWeightRegular;
+    }
+
+    .addressMobile {
+        display: none;
+    }
+
+    svg {
+        height: rem-calc(16);
+        width: auto;
+        @include margin(0, 2, 0, 0);
+    }
+
+    .buttons {
+        display: flex;
+        flex: 0 0 100%;
+        flex-wrap: wrap;
+        @include padding(1, 0, 0);
+        > button {
+            font-weight: $fontWeightRegular;
+            @include typoM;
+
+            &:first-child {
+                width: rem-calc(160);
+            }
+        }
+    }
+
+    button {
+        display: flex;
+        flex: 0 0 auto;
+        width: auto;
+        align-items: center;
+        color: $colorSecondaryDark;
+        background: transparent;
+        border: none;
+        @include padding(2, 0);
+        opacity: 0.7;
+
+        &:hover {
+            cursor: pointer;
+            opacity: 1;
+        }
+    }
+}
+
+.network {
+    background-color: $colorSecondaryHighlight;
+    text-transform: uppercase;
+    border-radius: rem-calc(12);
+    @include padding(0, 2);
+    @include margin(0);
+    @include typoNetwork;
+    position: absolute;
+    top: space(-1.5);
+    right: space(-4);
+    cursor: default;
+    z-index: 1;
+}
+
+@media only screen and (max-width: $bpMediumLow) {
+    .detailsButton {
+        flex: 0 0 100%;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media only screen and (max-width: $bpMediumHigh) {
+    .details {
+        right: 0;
+        transform: none;
+        left: unset;
+    }
+
+    .detailsButton {
+        > div {
+            width: 100%;
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+
+    .detailsHeader {
+        flex-wrap: wrap;
+    }
+
+    .network {
+        right: rem-calc(-12);
+    }
+}
+
+@media only screen and (max-width: $bpSmallHigh) {
+    .details {
+        max-width: calc(100vw - 24px);
+    }
+
+    .detailsBody {
+        .addressMobile {
+            display: block;
+        }
+        .address {
+            display: none;
+        }
+    }
+}

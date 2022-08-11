@@ -1,0 +1,80 @@
+@use '../styles/master' as *;
+
+.home {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 0 0 100%;
+    @include layoutTile;
+
+    .header {
+        display: flex;
+        flex: 0 0 100%;
+        align-items: center;
+        position: relative;
+        justify-content: center;
+        @include devider20;
+        @include margin(0, 0, 5);
+
+        .title {
+            @include padding(7);
+            text-align: center;
+            width: 100%;
+            @include typoXXLcaps;
+
+            .icon {
+                svg {
+                    color: $colorPrimary;
+                }
+            }
+        }
+        .tooltip {
+            position: absolute;
+            right: rem-calc(5);
+            top: rem-calc(5);
+        }
+    }
+
+    .astronaut {
+        display: flex;
+        flex: 0 0 100%;
+        justify-content: center;
+
+        svg {
+            width: rem-calc(200);
+        }
+    }
+
+    .copy {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+        max-width: rem-calc(440);
+        @include padding(0, 0, 2);
+    }
+
+    .button {
+        display: flex;
+        flex: 0 0 100%;
+        justify-content: center;
+        @include margin(8, 0);
+    }
+
+    .data {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        @include margin(5, 0);
+
+        .label {
+            width: 50%;
+            color: $fontColorLightSecondary;
+            text-align: right;
+            @include padding(0, 2, 2, 0);
+        }
+
+        .value {
+            width: 50%;
+            @include padding(0, 0, 2, 2);
+        }
+    }
+}

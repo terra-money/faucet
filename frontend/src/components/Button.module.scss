@@ -1,0 +1,191 @@
+@use '../styles/master' as *;
+
+.button {
+    transition: background-color 0.2s, border 0.2s;
+    color: $fontColorLightPrimary;
+    appearance: none;
+    border: none;
+    border-radius: rem-calc(30);
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    word-wrap: normal;
+    word-break: normal;
+
+    .prefix,
+    .suffix {
+        display: flex;
+        align-items: center;
+        display: inline-block;
+    }
+
+    // Sizes
+    &.small {
+        @include buttonS;
+
+        svg,
+        .progressIndicator {
+            width: rem-calc(10);
+            height: rem-calc(10);
+        }
+
+        .prefix {
+            margin-inline-end: space(2);
+        }
+
+        .suffix {
+            margin-inline-start: space(2);
+        }
+    }
+
+    &.medium {
+        @include buttonM;
+
+        svg {
+            width: rem-calc(12);
+            height: rem-calc(12);
+        }
+
+        .prefix {
+            margin-inline-end: space(3);
+        }
+
+        .suffix {
+            width: rem-calc(12);
+            margin-inline-start: space(3);
+        }
+    }
+
+    &.large {
+        @include buttonL;
+        svg {
+            width: rem-calc(18);
+            height: rem-calc(18);
+        }
+
+        .prefix {
+            margin-inline-end: space(4.5);
+        }
+
+        .suffix {
+            margin-inline-start: space(4.5);
+        }
+    }
+
+    // Variants
+    &.solid,
+    &.round {
+        @include buttonSolidPrimary;
+        @include buttonSolidSecondary;
+        @include buttonSolidTertiary;
+    }
+
+    &.round {
+        border-radius: 50%;
+        @include padding(0);
+
+        .prefix,
+        .suffix {
+            @include margin(0);
+            display: flex;
+        }
+
+        &.small {
+            height: rem-calc(32);
+            width: rem-calc(32);
+
+            svg {
+                width: rem-calc(12);
+                height: rem-calc(12);
+            }
+        }
+
+        &.medium {
+            height: rem-calc(40);
+            width: rem-calc(40);
+
+            svg {
+                width: rem-calc(14);
+                height: rem-calc(14);
+            }
+        }
+
+        &.large {
+            height: rem-calc(56);
+            width: rem-calc(56);
+
+            svg {
+                width: rem-calc(20);
+                height: rem-calc(20);
+            }
+        }
+    }
+
+    &.transparent {
+        background: none;
+        @include padding(0);
+        height: unset;
+
+        &.primary {
+            color: $colorPrimary;
+
+            * {
+                color: $colorPrimary;
+            }
+
+            &:hover {
+                color: $colorPrimaryHighlight;
+
+                * {
+                    color: $colorPrimaryHighlight;
+                }
+            }
+
+            &:active,
+            &:focus {
+                color: $colorPrimaryHighlight;
+            }
+        }
+
+        &.secondary {
+            color: $colorSecondary;
+
+            * {
+                color: $colorSecondary;
+            }
+
+            &:hover,
+            &:active,
+            &:focus {
+                color: $colorSecondaryHighlight;
+            }
+        }
+
+        &.tertiary {
+            color: $colorSecondaryDark;
+
+            &:hover,
+            &:focus,
+            &:active {
+                color: lighten($colorSecondaryDark, 10%);
+            }
+        }
+    }
+}
+
+.link {
+    display: flex;
+
+    &:hover,
+    &:focus,
+    &:active {
+        text-decoration: none;
+    }
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.5 !important;
+}

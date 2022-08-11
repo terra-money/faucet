@@ -1,0 +1,155 @@
+@use '../styles/master' as *;
+
+.overlay {
+    background-color: $alphaBlack60 !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin: 0 !important;
+
+    .loader {
+        display: flex;
+        flex: 0 0 100%;
+        justify-content: center;
+        @include margin(4, 0);
+    }
+
+    .button {
+        @include margin(4, 0, 0);
+    }
+
+    .content {
+        @include layoutTile;
+        width: rem-calc(540);
+        max-width: 100vw;
+        transform: translateX(-50%);
+        position: absolute;
+        left: 50%;
+        @include padding(4);
+        display: flex;
+        flex-direction: column;
+        outline: none;
+        cursor: auto;
+
+        .header {
+            @include typoXXLcaps;
+            text-align: center;
+            color: $fontColorLightPrimary;
+            font-weight: $fontWeightRegular;
+            @include margin(0, 0, 4);
+        }
+
+        .enableContent {
+            display: flex;
+            flex: 0 0 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .text {
+            @include typoM;
+            text-align: center;
+            color: $fontColorLightSecondary;
+            width: 100%;
+            display: block;
+
+            button {
+                @include typoM;
+                appearance: none;
+                font-weight: $fontWeightSemibold;
+                color: $colorPrimary;
+                background-color: transparent;
+                border: none;
+                text-decoration: none !important;
+
+                &:hover {
+                    text-decoration: underline !important;
+                    cursor: pointer;
+                }
+            }
+        }
+
+        .list {
+            @include padding(2, 0);
+            display: flex;
+            flex-direction: column;
+            gap: space(4);
+
+            > div {
+                > div,
+                button,
+                a {
+                    background: transparent;
+                    @include padding(2);
+                    box-shadow: none;
+                    display: flex;
+                    align-items: center;
+                    appearance: none;
+                    border: none;
+                    width: 100%;
+                    text-decoration: none;
+                    border-radius: space(2);
+                    cursor: pointer;
+
+                    &.disabled {
+                        pointer-events: none;
+                        img,
+                        .info .name {
+                            opacity: 0.5;
+                        }
+                    }
+
+                    &:hover {
+                        background-color: $alphaWhite10;
+                    }
+
+                    img {
+                        height: space(15);
+                        width: space(15);
+                    }
+
+                    .info {
+                        font-weight: $fontWeightRegular;
+                        display: flex;
+                        flex-direction: column;
+                        margin-left: space(5);
+
+                        .name {
+                            @include typoLcaps;
+                            color: $fontColorLightPrimary;
+                        }
+
+                        .description {
+                            @include margin(1, 0, 0);
+                            color: $fontColorLightTertiary;
+                            text-align: left;
+                            @include typoM;
+
+                            &.capitalize {
+                                text-transform: capitalize;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        canvas {
+            max-width: 90vw;
+            max-height: 90vw;
+            height: rem-calc(320) !important;
+            width: rem-calc(320) !important;
+            border: space(3) solid $colorWhite;
+            margin: 0 auto;
+        }
+    }
+}

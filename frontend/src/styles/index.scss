@@ -1,0 +1,75 @@
+@use 'master' as *;
+@use 'fonts' as *;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+html,
+body {
+    font-family: Inter, sans-serif;
+    font-weight: $fontWeightRegular;
+    font-style: normal;
+    font-size: $rem-base;
+    line-height: space(6);
+    color: $fontColorLightPrimary;
+    word-wrap: break-word;
+    word-break: break-word;
+    scrollbar-width: none;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    @include bgBodyDark;
+}
+
+.tippyContainer {
+    @include layoutTooltip;
+}
+
+body {
+    min-height: 100vh;
+    position: relative;
+}
+
+.desktop {
+    display: none;
+}
+
+.tablet {
+    display: none;
+}
+
+.mobile {
+    display: block;
+}
+
+@media screen and (min-width: $bpSmallHigh) {
+    .tablet {
+        display: block;
+    }
+
+    .mobile {
+        &:not(.tablet) {
+            display: none;
+        }
+    }
+}
+
+@media screen and (min-width: $bpDesktopLow) {
+    .desktop {
+        display: block;
+    }
+
+    .tablet {
+        &:not(.desktop) {
+            display: none;
+        }
+    }
+}

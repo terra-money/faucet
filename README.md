@@ -1,16 +1,16 @@
-# Terra Testnet Faucet
+# Mars Hub Testnet Faucet
 
-![banner](./terra-faucet.png)
+![banner](./banner.png)
 
-Terra Testnet Faucet is a client tool that allows anyone to easily request a nominal amount of Terra or Luna assets for testing purposes. This app needs to be deployed on a Terra testnet full node, because it relies on using the `terracli` command to send tokens.
+Mars Hub testnet Faucet is a client tool that allows anyone to easily request a nominal amount of Terra or Luna assets for testing purposes.
 
 **WARNING**: Tokens recieved over the faucet are not real assets and have no market value.
 
-This faucet implementation is a fork of the [Cosmos Faucet](https://github.com/cosmos/faucet).
+This faucet implementation is a fork of the [Terra Faucet](https://github.com/terra-money/faucet).
 
-## Get tokens on Terra testnets
+## Get tokens on Mars testnet
 
-Using the testnets is really easy. Simply go to https://faucet.terra.money, chose your network and input your testnet address. 
+Using the testnets is really easy. Simply go to https://faucet.marsprotocol.io and connect your (Keplr) wallet.
 
 ## Usage
 

@@ -1,0 +1,413 @@
+@use 'sass:math';
+$rem-base: 15px;
+
+/* Colors */
+$colorWhite: #ffffff;
+$colorGrey: #3a3c49;
+
+/* CI Colors */
+$colorPrimary: #14a693;
+$colorPrimaryHighlight: #15bfa9;
+$colorSecondary: #524bb1;
+$colorSecondaryHighlight: #6962cc;
+$colorSecondaryDark: #440b37;
+$colorSecondaryAlpha: rgba(68, 11, 55, 0.7);
+$colorAccent: #2c1b2f;
+$colorAccentHighlight: #4d2935;
+$colorAccentDark: #341a2a;
+
+/* Alpha Colors */
+$alphaWhite10: rgba(255, 255, 255, 0.1);
+$alphaWhite20: rgba(255, 255, 255, 0.2);
+$alphaWhite30: rgba(255, 255, 255, 0.3);
+$alphaWhite40: rgba(255, 255, 255, 0.4);
+$alphaWhite50: rgba(255, 255, 255, 0.5);
+$alphaWhite60: rgba(255, 255, 255, 0.6);
+$alphaWhite70: rgba(255, 255, 255, 0.7);
+$alphaWhite80: rgba(255, 255, 255, 0.8);
+$alphaWhite90: rgba(255, 255, 255, 0.9);
+$alphaBlack10: rgba(0, 0, 0, 0.1);
+$alphaBlack20: rgba(0, 0, 0, 0.2);
+$alphaBlack30: rgba(0, 0, 0, 0.3);
+$alphaBlack40: rgba(0, 0, 0, 0.4);
+$alphaBlack50: rgba(0, 0, 0, 0.5);
+$alphaBlack60: rgba(0, 0, 0, 0.6);
+$alphaBlack70: rgba(0, 0, 0, 0.7);
+$alphaBlack80: rgba(0, 0, 0, 0.8);
+$alphaBlack90: rgba(0, 0, 0, 0.9);
+
+/* Background Colors */
+$backgroundBody: #562a3b;
+$backgroundBodyDark: #141621;
+
+/* Backgrounds */
+@mixin bgBody {
+    background-color: $backgroundBody;
+    background-size: 100% auto;
+    background-image: url('../images/bg.svg');
+    background-position: center top;
+}
+
+@mixin bgBodyDark {
+    background-color: $backgroundBodyDark;
+}
+
+@mixin bgTile() {
+    background: linear-gradient(
+        132.82deg,
+        rgba(11, 14, 32, 0.64) 5.03%,
+        rgba(52, 20, 33, 0.9) 73.08%
+    );
+}
+
+@mixin bgPopover {
+    background: linear-gradient(180deg, #fef4ed -2.1%, #ecdbe0 97.53%);
+    color: $colorSecondaryDark;
+}
+
+@mixin bgTooltip {
+    background: linear-gradient(
+        77.47deg,
+        rgba(20, 24, 57, 0.9) 11.58%,
+        rgba(34, 16, 57, 0.9) 93.89%
+    );
+}
+
+@mixin layoutTooltip {
+    @include padding(2, 4);
+    @include bgTooltip;
+    box-shadow: 0 rem-calc(3) rem-calc(4) rgba(0, 0, 0, 0.14),
+        0 rem-calc(3) rem-calc(3) rgba(0, 0, 0, 0.12),
+        0 rem-calc(1) rem-calc(8) rgba(0, 0, 0, 0.2);
+    border-radius: rem-calc(12);
+}
+
+/* Typography */
+$fontWeightLight: 300;
+$fontWeightRegular: 400;
+$fontWeightSemibold: 600;
+
+$fontColorLightPrimary: $colorWhite;
+$fontColorLightSecondary: $alphaWhite60;
+$fontColorLightTertiary: $alphaWhite40;
+
+@mixin typoH1 {
+    font-weight: $fontWeightSemibold;
+    font-size: rem-calc(38.5);
+    line-height: space(14);
+}
+
+@mixin typoH1caps {
+    @include typoH1;
+    letter-spacing: space(0.5);
+    text-transform: uppercase;
+}
+
+@mixin typoH2 {
+    font-size: rem-calc(30.42);
+    line-height: space(10);
+}
+
+@mixin typoH2caps {
+    @include typoH2;
+    text-transform: uppercase;
+}
+
+@mixin typoH3 {
+    font-size: rem-calc(24.03);
+    line-height: space(9);
+    font-weight: $fontWeightRegular;
+}
+
+@mixin typoH4 {
+    font-size: rem-calc(24.03);
+    line-height: space(9);
+    font-weight: $fontWeightRegular;
+}
+
+@mixin typoXXL {
+    font-size: rem-calc(21.36);
+    line-height: space(8);
+}
+
+@mixin typoXXLcaps {
+    @include typoXXL;
+    font-weight: $fontWeightLight;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(3);
+}
+
+@mixin typoXL {
+    font-size: rem-calc(18.98);
+    line-height: space(7);
+}
+
+@mixin typoXLcaps {
+    @include typoXL;
+    letter-spacing: rem-calc(5);
+    text-transform: uppercase;
+    font-weight: $fontWeightLight;
+}
+
+@mixin typoL {
+    font-size: rem-calc(16.88);
+    line-height: space(6);
+}
+
+@mixin typoLcaps {
+    @include typoL;
+    font-weight: $fontWeightSemibold;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(3);
+}
+
+@mixin typoM {
+    font-size: rem-calc(15);
+    line-height: space(5);
+}
+
+@mixin typoMcaps {
+    @include typoM;
+    text-transform: uppercase;
+}
+
+@mixin typoS {
+    font-size: rem-calc(13.33);
+    line-height: space(5);
+}
+
+@mixin typoScaps {
+    @include typoS;
+    font-weight: $fontWeightSemibold;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(3);
+}
+
+@mixin typoXS {
+    font-size: rem-calc(11.85);
+    line-height: space(4);
+}
+
+@mixin typoXScaps {
+    @include typoXS;
+    font-weight: $fontWeightSemibold;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(3);
+}
+
+@mixin typoXXS {
+    font-size: rem-calc(10.53);
+    line-height: space(4);
+}
+
+@mixin typoXXScaps {
+    @include typoXXS;
+    font-weight: $fontWeightSemibold;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(2);
+}
+
+@mixin typoXXXS {
+    font-size: rem-calc(9.36);
+    line-height: space(2);
+}
+
+@mixin typoXXXScaps {
+    @include typoXXXS;
+    font-weight: $fontWeightSemibold;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(2);
+}
+
+@mixin typoButton {
+    @include typoS;
+    font-weight: $fontWeightSemibold;
+}
+
+@mixin typoNav {
+    @include typoL;
+    text-transform: uppercase;
+    letter-spacing: rem-calc(5);
+}
+
+@mixin typoNetwork {
+    font-size: rem-calc(10.53);
+    font-weight: $fontWeightSemibold;
+}
+
+/* Devider */
+@mixin devider10 {
+    border-bottom: 1px solid $alphaWhite10;
+}
+
+@mixin devider20 {
+    border-bottom: 1px solid $alphaWhite20;
+}
+
+@mixin devider40 {
+    border-bottom: 1px solid $alphaWhite40;
+}
+
+@mixin devider60 {
+    border-bottom: 1px solid $alphaWhite60;
+}
+
+/* Spacing */
+$spacingBase: 4;
+
+@function space($multiplier) {
+    $space: rem-calc($spacingBase * $multiplier);
+    @return $space;
+}
+
+@mixin padding($top: 1, $right: null, $bottom: null, $left: null) {
+    @if $left {
+        padding: space($top) space($right) space($bottom) space($left);
+    } @else {
+        @if $bottom {
+            padding: space($top) space($right) space($bottom);
+        } @else {
+            @if $right {
+                padding: space($top) space($right);
+            } @else {
+                padding: space($top);
+            }
+        }
+    }
+}
+
+@mixin margin($top: 1, $right: null, $bottom: null, $left: null) {
+    @if $left {
+        margin: space($top) space($right) space($bottom) space($left);
+    } @else {
+        @if $bottom {
+            margin: space($top) space($right) space($bottom);
+        } @else {
+            @if $right {
+                margin: space($top) space($right);
+            } @else {
+                margin: space($top);
+            }
+        }
+    }
+}
+
+@function strip-unit($num) {
+    @return math.div($num, $num * 0 + 1);
+}
+
+@function convert-to-rem($value, $base-value: $rem-base) {
+    $value: math.div(strip-unit($value), strip-unit($base-value)) * 1rem;
+    @if ($value == 0rem) {
+        $value: 0;
+    }
+    @return $value;
+}
+
+@function rem-calc($values, $base-value: $rem-base) {
+    $max: length($values);
+    @if $max == 1 {
+        @return convert-to-rem(nth($values, 1), $base-value);
+    }
+    $remValues: ();
+    @for $i from 1 through $max {
+        $remValues: append(
+            $remValues,
+            convert-to-rem(nth($values, $i), $base-value)
+        );
+    }
+    @return $remValues;
+}
+
+/* Buttons */
+$buttonBorder: $alphaWhite40;
+$buttonBorderHover: $colorWhite;
+
+@mixin buttonS {
+    @include typoS;
+    @include padding(1.5, 5);
+    height: rem-calc(32);
+}
+
+@mixin buttonM {
+    @include typoM;
+    @include padding(2.5, 6);
+    height: rem-calc(40);
+}
+
+@mixin buttonL {
+    @include typoL;
+    @include padding(2.5, 6);
+    height: rem-calc(56);
+}
+
+@mixin buttonSolidPrimary {
+    &.primary {
+        background-color: $colorPrimary;
+
+        &:hover,
+        &:focus {
+            background-color: $colorPrimaryHighlight;
+        }
+
+        &:active {
+            background-color: lighten($colorPrimary, 10%);
+        }
+    }
+}
+
+@mixin buttonSolidSecondary {
+    &.secondary {
+        background-color: $colorSecondary;
+
+        &:hover,
+        &:focus {
+            background-color: $colorSecondaryHighlight;
+        }
+
+        &:active {
+            background-color: lighten($colorSecondary, 10%);
+        }
+    }
+}
+
+@mixin buttonSolidTertiary {
+    &.tertiary {
+        background-color: $colorSecondaryDark;
+        border: 1px solid $alphaWhite60;
+
+        &:hover,
+        &:focus {
+            border: 1px solid $fontColorLightPrimary;
+        }
+
+        &:active {
+            background-color: lighten($colorSecondaryDark, 10%);
+        }
+    }
+}
+
+/* LAYOUTS */
+@mixin layoutTile {
+    @include bgTile;
+    border: rem-calc(7) solid $colorAccentHighlight;
+    border-radius: rem-calc(16);
+    height: fit-content;
+}
+
+@mixin layoutPopover {
+    @include bgPopover;
+    box-shadow: 0 rem-calc(16) rem-calc(24) rgba(0, 0, 0, 0.14),
+        0 rem-calc(6) rem-calc(30) rgba(0, 0, 0, 0.12),
+        0 rem-calc(8) rem-calc(10) rgba(0, 0, 0, 0.2);
+    border-radius: rem-calc(12);
+}
+
+/* Breakpoints */
+$bpDesktopLow: 1024px;
+$bpMediumHigh: 1023px;
+$bpMediumLow: 721px;
+$bpSmallHigh: 720px;
+
+/* Dimensions */
+$footerHeight: rem-calc(200);

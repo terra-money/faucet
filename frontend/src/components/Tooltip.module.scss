@@ -1,0 +1,13 @@
+@use '../styles/master' as *;
+
+.icon {
+    width: rem-calc(18);
+    fill: $fontColorLightPrimary;
+    opacity: 0.4;
+    cursor: pointer;
+    outline: none;
+
+    &:hover {
+        opacity: 0.8;
+    }
+}

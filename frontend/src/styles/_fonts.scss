@@ -1,0 +1,115 @@
+@use 'master' as *;
+
+@font-face {
+    font-family: Inter;
+    src: url('../fonts/Inter-ExtraLight.woff2') format('woff2'),
+        url('../fonts/Inter-ExtraLight.woff') format('woff');
+    font-weight: $fontWeightLight;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Inter;
+    src: url('../fonts/Inter-Regular.woff2') format('woff2'),
+        url('../fonts/Inter-Regular.woff') format('woff');
+    font-weight: $fontWeightRegular;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Inter;
+    src: url('../fonts/Inter-SemiBold.woff2') format('woff2'),
+        url('../fonts/Inter-SemiBold.woff') format('woff');
+    font-weight: $fontWeightSemibold;
+    font-style: normal;
+    font-display: swap;
+}
+
+a {
+    color: $colorPrimary;
+    text-decoration: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+        color: $colorPrimaryHighlight;
+        text-decoration: underline;
+    }
+}
+
+b,
+strong {
+    font-weight: $fontWeightSemibold;
+}
+
+h1,
+.h1 {
+    @include typoH1;
+}
+
+h2,
+.h2 {
+    @include typoH2;
+}
+
+.h2Caps {
+    @include typoH2caps;
+}
+
+h5,
+.h5,
+.xxl {
+    @include typoXXL;
+}
+
+h6,
+.h6,
+.xxlCaps {
+    @include typoXXLcaps;
+}
+
+.xl {
+    @include typoXL;
+}
+
+.m {
+    @include typoM;
+}
+
+.s {
+    @include typoS;
+}
+
+.sCaps {
+    @include typoScaps;
+}
+
+.xs {
+    @include typoXS;
+}
+
+.xxs {
+    @include typoXXS;
+}
+
+.xxsCaps {
+    @include typoXXScaps;
+    font-weight: $fontWeightRegular;
+}
+
+.xxxs {
+    @include typoXXXS;
+    font-weight: $fontWeightRegular;
+}
+
+.xxxsCaps {
+    @include typoXXXScaps;
+}
+
+button,
+.button {
+    @include typoButton;
+    font-weight: $fontWeightRegular;
+}

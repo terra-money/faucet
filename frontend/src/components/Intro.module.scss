@@ -1,0 +1,56 @@
+@use '../styles/master' as *;
+
+.intro {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-height: calc(100vh - 136px);
+    flex: 0 0 100%;
+
+    .content {
+        display: block;
+        text-align: center;
+
+        .redbank {
+            width: rem-calc(140);
+            @include margin(0, 0, 10);
+        }
+
+        .title {
+            width: 100%;
+            @include typoH1caps;
+            text-align: center;
+            @include margin(0, 0, 4);
+        }
+
+        .subtitle {
+            width: 100%;
+            @include typoXXLcaps;
+            color: $fontColorLightSecondary;
+            text-align: center;
+            @include margin(0, 0, 8);
+        }
+
+        .copy {
+            width: 100%;
+            color: $fontColorLightSecondary;
+            text-align: center;
+            @include margin(0, 0, 8);
+        }
+
+        .connect {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+
+            .button {
+                background-color: $colorSecondary;
+                border: none;
+
+                &:hover {
+                    background-color: $colorSecondaryHighlight;
+                }
+            }
+        }
+    }
+}

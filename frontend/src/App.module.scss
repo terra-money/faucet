@@ -1,0 +1,58 @@
+@use './styles/master' as *;
+
+.app {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+
+    .background {
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        position: absolute;
+        background-repeat: no-repeat;
+        @include bgBody;
+        filter: brightness(1) hue-rotate(0deg);
+        transition: 3s filter linear, 3s -webkit-filter linear;
+        z-index: 1;
+
+        &.night {
+            filter: brightness(0.3) hue-rotate(-82deg);
+        }
+    }
+
+    .body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        flex: 0 0 100%;
+        margin: 0 auto;
+        @include padding(3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-wrap: wrap;
+        flex: 0 0 100%;
+        margin: 0 auto;
+    }
+}
+
+@media screen and (min-width: $bpMediumLow) {
+    .app {
+        .body {
+            @include padding(6, 12);
+            max-width: rem-calc(1248);
+        }
+
+        .content {
+            max-width: rem-calc(775);
+        }
+    }
+}

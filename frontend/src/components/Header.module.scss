@@ -1,0 +1,51 @@
+@use '../styles/master' as *;
+
+.header {
+    display: flex;
+    flex-wrap: nowrap;
+    flex: 0 0 100%;
+    @include margin(0, 0, 8);
+    justify-content: space-between;
+
+    .empty {
+        display: none;
+    }
+
+    .logo {
+        display: flex;
+        flex: 0 0 rem-calc(58);
+        align-items: center;
+
+        svg {
+            width: rem-calc(58);
+        }
+    }
+
+    .connect {
+        display: flex;
+        width: rem-calc(435);
+        justify-content: flex-end;
+        align-items: center;
+        position: relative;
+    }
+}
+
+@media screen and (min-width: $bpDesktopLow) {
+    .header {
+        flex-wrap: wrap;
+
+        .logo,
+        .empty {
+            display: flex;
+            align-items: center;
+        }
+
+        .empty {
+            width: rem-calc(435);
+        }
+
+        .logo {
+            justify-content: center;
+        }
+    }
+}

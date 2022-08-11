@@ -1,0 +1,15 @@
+@use 'master' as *;
+
+:export {
+    /* COLORS */
+    fontPrimary: $fontColorLightPrimary;
+    fontSecondary: $fontColorLightSecondary;
+    backgroundBody: $backgroundBody;
+    primary: $colorPrimary;
+    primaryHighlight: $colorPrimaryHighlight;
+    secondary: $colorSecondary;
+    secondaryHighlight: $colorSecondaryHighlight;
+    secondaryDark: $colorSecondaryDark;
+    secondaryAlpha: $colorSecondaryAlpha;
+    transparentWhite: $alphaWhite20;
+}
