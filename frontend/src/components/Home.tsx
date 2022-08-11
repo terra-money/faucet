@@ -8,7 +8,7 @@ import { useWallet } from '@marsprotocol/wallet-connector'
 import { CircularProgress } from '@material-ui/core'
 import axios from 'axios'
 import { useState } from 'react'
-import { GoogleReCaptcha } from 'react-google-recaptcha-v3'
+import ReCAPTCHA from 'react-google-recaptcha'
 import { useTranslation } from 'react-i18next'
 
 const Home = () => {
@@ -21,7 +21,12 @@ const Home = () => {
     const [success, setSuccess] = useState(false)
     const [verified, setVerified] = useState(false)
     const [txUrl, setTxUrl] = useState('')
-    const [captchaResponse, setCaptchaResponse] = useState('')
+    const [captchaResponse, setCaptchaResponse] = useState<string | null>('')
+
+    const handleCaptcha = (response: string | null) => {
+        setCaptchaResponse(response)
+        setVerified(true)
+    }
 
     const resetUI = () => {
         setError(false)
@@ -194,11 +199,9 @@ const Home = () => {
                         </dd>
                     </dl>
                     <div className={styles.captcha}>
-                        <GoogleReCaptcha
-                            onVerify={(token: string) => {
-                                setCaptchaResponse(token)
-                                setVerified(true)
-                            }}
+                        <ReCAPTCHA
+                            sitekey='6LdtqBQTAAAAAI-G1Zg2GqnYEoMWKAeq_GftuQI2'
+                            onChange={handleCaptcha}
                         />
                     </div>
                     <div className={styles.button}>
