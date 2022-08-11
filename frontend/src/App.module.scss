@@ -4,6 +4,7 @@
     width: 100vw;
     min-height: 100%;
     display: flex;
+    flex-wrap: wrap;
 
     .background {
         width: 100%;
@@ -41,6 +42,14 @@
         flex-wrap: wrap;
         flex: 0 0 100%;
         margin: 0 auto;
+    }
+
+    .copyright {
+        display: flex;
+        width: 100%;
+        flex: 0 0 100%;
+        justify-content: center;
+        @include margin(12, 0, 0);
     }
 }
 

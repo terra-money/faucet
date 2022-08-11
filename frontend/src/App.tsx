@@ -36,6 +36,7 @@ const App = () => {
                 <div className={styles.content}>
                     {isConnected ? <Home /> : <Intro />}
                 </div>
+                <div className={styles.copyright}>&copy; 2022 MARS</div>
             </div>
         </div>
     )

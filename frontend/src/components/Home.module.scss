@@ -13,10 +13,9 @@
         position: relative;
         justify-content: center;
         @include devider20;
-        @include margin(0, 0, 5);
 
         .title {
-            @include padding(7);
+            @include padding(4, 7);
             text-align: center;
             width: 100%;
             @include typoXXLcaps;
@@ -29,52 +28,114 @@
         }
         .tooltip {
             position: absolute;
-            right: rem-calc(5);
-            top: rem-calc(5);
+            right: space(1);
+            top: space(1);
+        }
+
+        .close {
+            position: absolute;
+            top: space(3);
+            left: space(3);
+
+            svg {
+                width: space(9);
+                circle,
+                line {
+                    stroke: $fontColorLightSecondary;
+                }
+            }
+
+            &:hover {
+                cursor: pointer;
+                svg {
+                    circle,
+                    line {
+                        stroke: $fontColorLightPrimary;
+                    }
+                }
+            }
         }
     }
 
-    .astronaut {
-        display: flex;
-        flex: 0 0 100%;
-        justify-content: center;
-
-        svg {
-            width: rem-calc(200);
-        }
-    }
-
-    .copy {
-        width: 100%;
-        text-align: center;
-        margin: 0 auto;
-        max-width: rem-calc(440);
-        @include padding(0, 8, 2);
-    }
-
-    .button {
-        display: flex;
-        flex: 0 0 100%;
-        justify-content: center;
-        @include margin(8, 0);
-    }
-
-    .data {
+    .content {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
+        flex: 0 0 100%;
         width: 100%;
-        @include margin(5, 0);
+        @include padding(14, 10, 12);
 
-        .label {
-            width: 50%;
+        .subtitle {
+            width: 100%;
+            @include typoXXLcaps;
             color: $fontColorLightSecondary;
-            text-align: right;
-            @include padding(0, 2, 2, 0);
+            text-align: center;
+            @include margin(0, 0, 8);
         }
 
-        .value {
-            width: 50%;
-            @include padding(0, 0, 2, 2);
+        .statusText {
+            width: 100%;
+            @include typoXXLcaps;
+            color: $fontColorLightPrimary;
+            text-align: center;
+            @include margin(0);
+        }
+
+        .status {
+            display: flex;
+            flex: 0 0 100%;
+            width: 100%;
+            justify-content: center;
+            @include margin(0, 0, 8);
+
+            svg {
+                align-self: center;
+                width: rem-calc(80);
+                height: rem-calc(80);
+            }
+        }
+
+        .astronaut {
+            display: flex;
+            flex: 0 0 100%;
+            justify-content: center;
+
+            svg {
+                width: rem-calc(200);
+            }
+        }
+
+        .copy {
+            width: 100%;
+            text-align: center;
+            margin: 0 auto space(2);
+            max-width: rem-calc(440);
+        }
+
+        .button {
+            display: flex;
+            flex: 0 0 100%;
+            justify-content: center;
+            @include margin(8, 0, 0);
+        }
+
+        .data {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            @include margin(5, 0);
+
+            .label {
+                width: 50%;
+                color: $fontColorLightSecondary;
+                text-align: right;
+                @include padding(0, 2, 2, 0);
+            }
+
+            .value {
+                width: 50%;
+                @include padding(0, 0, 2, 2);
+            }
         }
     }
 }
