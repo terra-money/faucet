@@ -49,7 +49,7 @@
         text-align: center;
         margin: 0 auto;
         max-width: rem-calc(440);
-        @include padding(0, 0, 2);
+        @include padding(0, 8, 2);
     }
 
     .button {

@@ -23,10 +23,7 @@ body {
     word-wrap: break-word;
     word-break: break-word;
     scrollbar-width: none;
-    overflow: hidden;
-    height: 100vh;
     width: 100vw;
-    @include bgBodyDark;
 }
 
 .tippyContainer {
