@@ -95,6 +95,13 @@
             }
         }
 
+        .captcha {
+            display: flex;
+            flex: 0 0 100%;
+            width: 100%;
+            justify-content: center;
+        }
+
         .astronaut {
             display: flex;
             flex: 0 0 100%;

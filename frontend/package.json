@@ -38,6 +38,7 @@
         "numeral": "^2.0.6",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",
+        "react-google-recaptcha-v3": "^1.10.0",
         "react-i18next": "^11.18.0",
         "react-use-clipboard": "^1.0.8",
         "sass": "^1.53.0"

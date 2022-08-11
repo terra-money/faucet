@@ -8,6 +8,7 @@ import { useWallet } from '@marsprotocol/wallet-connector'
 import { CircularProgress } from '@material-ui/core'
 import axios from 'axios'
 import { useState } from 'react'
+import { GoogleReCaptcha } from 'react-google-recaptcha-v3'
 import { useTranslation } from 'react-i18next'
 
 const Home = () => {
@@ -18,7 +19,9 @@ const Home = () => {
     const [errorText, setErrorText] = useState('')
     const [sentAmount, setSentAmount] = useState(0)
     const [success, setSuccess] = useState(false)
+    const [verified, setVerified] = useState(false)
     const [txUrl, setTxUrl] = useState('')
+    const [captchaResponse, setCaptchaResponse] = useState('')
 
     const resetUI = () => {
         setError(false)
@@ -30,11 +33,12 @@ const Home = () => {
     const handleSubmit = () => {
         const faucetUrl = 'https://faucet.marsprotocol.io/claim'
         setSending(true)
+
         axios
             .post(faucetUrl, {
                 address: address,
                 denom: 'umars',
-                response: '',
+                response: captchaResponse,
             })
             .then((res) => {
                 const { amount } = res.data
@@ -189,9 +193,17 @@ const Home = () => {
                             {truncate(address, [6, 4])}
                         </dd>
                     </dl>
+                    <div className={styles.captcha}>
+                        <GoogleReCaptcha
+                            onVerify={(token: string) => {
+                                setCaptchaResponse(token)
+                                setVerified(true)
+                            }}
+                        />
+                    </div>
                     <div className={styles.button}>
                         <Button
-                            disabled={sending}
+                            disabled={!verified || sending}
                             text={
                                 sending ? (
                                     <CircularProgress />

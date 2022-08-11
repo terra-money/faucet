@@ -33,7 +33,7 @@
 @media screen and (min-width: $bpDesktopLow) {
     .header {
         flex-wrap: wrap;
-        @include margin(0, 0, 30);
+        @include margin(0, 0, 15);
 
         .logo,
         .empty {
