@@ -24,7 +24,7 @@ const ConnectedButton = () => {
     // EXTERNAL HOOKS
     // ---------------
     const { disconnect } = useWalletManager()
-    const { name, address = '', chainInfo } = useWallet()
+    const { name, address = '', chainInfo, walletBalances } = useWallet()
     const { t } = useTranslation()
     const [isCopied, setCopied] = useClipboard(address, {
         successDuration: 1000 * 5,
@@ -33,8 +33,10 @@ const ConnectedButton = () => {
     // ---------------
     // VARIABLES
     // ---------------
-
-    const userBalance = 1000000
+    const userBalances = walletBalances?.balances || [
+        { denom: 'umars', amount: '0' },
+    ]
+    const userBalance = userBalances[0].amount
     const [showDetails, setShowDetails] = useState(false)
 
     const viewOnFinder = useCallback(() => {
@@ -71,10 +73,10 @@ const ConnectedButton = () => {
                     {name ? name : truncate(address, [2, 4])}
                 </span>
                 <div className={styles.balance}>
-                    {userBalance ? (
+                    {walletBalances ? (
                         `${formatValue(
                             lookup(
-                                userBalance,
+                                Number(userBalance),
                                 chainInfo?.stakeCurrency?.coinDenom || '',
                                 chainInfo?.stakeCurrency?.coinDecimals || 6
                             ),
@@ -103,7 +105,7 @@ const ConnectedButton = () => {
                                     </span>
                                     {formatValue(
                                         lookup(
-                                            userBalance,
+                                            Number(userBalance),
                                             chainInfo?.stakeCurrency
                                                 ?.coinDenom || '',
                                             chainInfo?.stakeCurrency

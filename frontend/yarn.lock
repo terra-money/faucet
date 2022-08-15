@@ -2319,10 +2319,10 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-6.10.0.tgz#c012c1ecc1a0e53d50e6af381618dca5268461c1"
   integrity sha512-lLseUPEhSFUXYTKj6q7s2O3s2vW2ebgA11vMAlKodXGf5AFw4zUoEbTz9CoFOC9jS6xY4Qr8BmRnxP/odT4Uuw==
 
-"@marsprotocol/wallet-connector@^0.5.2":
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@marsprotocol/wallet-connector/-/wallet-connector-0.5.2.tgz#05dde27d9d072e312f92c6bdfb138757bf298b1d"
-  integrity sha512-QrG4S6vdlfRY8kYREJHoDGWA7ZWwCiYZVWyV1Fu+AmEdzEhnlCiwcV0cPfN+zZKdmDPQiPDV3HmvzJx2q4DXYg==
+"@marsprotocol/wallet-connector@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@marsprotocol/wallet-connector/-/wallet-connector-0.5.4.tgz#8197cd88c0e812d09ad6888117f1c0f2856c4195"
+  integrity sha512-ZeHyCiYRK6VxoiXg0IxI7mrDI3YeUl5mvj19V1rXS57X0LpfByLETkbCb0R6K/muocXsJJlpnAGSx4iysER9Dg==
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.28.11"
     "@cosmjs/stargate" "^0.28.11"
