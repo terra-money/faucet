@@ -93,6 +93,20 @@
     }
 }
 
+.clickAway {
+    display: block;
+    position: fixed;
+    z-index: 99;
+    height: 100vh;
+    width: 100vw;
+    left: 0;
+    top: 0;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
 .details {
     display: flex;
     position: absolute;

@@ -1,5 +1,5 @@
 import styles from './Button.module.scss'
-import { CircularProgress } from '@material-ui/core'
+import CircularProgress from './CircularProgress'
 import { ReactNode } from 'react'
 
 interface Props {
@@ -52,10 +52,10 @@ const Button = ({
                             color='inherit'
                             size={
                                 size === 'small'
-                                    ? '10px'
+                                    ? 10
                                     : size === 'medium'
-                                    ? '12px'
-                                    : '18px'
+                                    ? 12
+                                    : 18
                             }
                         />
                     ) : (

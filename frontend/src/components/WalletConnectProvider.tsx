@@ -1,13 +1,13 @@
 import KeplrImage from '../images/wallets/keplr-wallet-extension.png'
 import WalletConnectImage from '../images/wallets/keplr-walletconnect.png'
 import buttonStyles from './Button.module.scss'
+import CircularProgress from './CircularProgress'
 import styles from './WalletConnectProvider.module.scss'
 import {
     ChainInfoID,
     WalletManagerProvider,
     WalletType,
 } from '@marsprotocol/wallet-connector'
-import { CircularProgress } from '@material-ui/core'
 import i18next from 'i18next'
 import { FC, useState } from 'react'
 import { Trans } from 'react-i18next'
@@ -66,7 +66,7 @@ const CosmosWalletConnectProvider: FC<WrapperComponent> = ({ children }) => {
                 localStorageKey='walletConnection'
                 renderLoader={() => (
                     <div className={styles.loader}>
-                        <CircularProgress size={20} />
+                        <CircularProgress size={30} />
                     </div>
                 )}
                 closeIcon={<div />}

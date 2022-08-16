@@ -2,6 +2,7 @@ import { formatValue, lookup } from '../libs/parse'
 import { truncate } from '../libs/text'
 import colors from '../styles/_assets.module.scss'
 import Button from './Button'
+import CircularProgress from './CircularProgress'
 import styles from './ConnectButton.module.scss'
 import { CheckSVG, CopySVG, ExternalSVG, MarsSVG, WalletSVG } from './Svg'
 import {
@@ -10,7 +11,6 @@ import {
     useWallet,
     useWalletManager,
 } from '@marsprotocol/wallet-connector'
-import { CircularProgress, ClickAwayListener } from '@material-ui/core'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useClipboard from 'react-use-clipboard'
@@ -100,15 +100,14 @@ const ConnectedButton = () => {
                         )}`
                     ) : (
                         <CircularProgress
-                            color='inherit'
-                            size={'0.9rem'}
+                            size={12}
                             className={styles.circularProgress}
                         />
                     )}
                 </div>
             </button>
             {showDetails && (
-                <ClickAwayListener onClickAway={onClickAway}>
+                <>
                     <div className={styles.details}>
                         <div className={styles.detailsHeader}>
                             <div className={styles.detailsBalance}>
@@ -175,7 +174,12 @@ const ConnectedButton = () => {
                             </div>
                         </div>
                     </div>
-                </ClickAwayListener>
+                    <div
+                        className={styles.clickAway}
+                        role='button'
+                        onClick={onClickAway}
+                    />
+                </>
             )}
         </>
     )
