@@ -33,10 +33,10 @@ const ConnectedButton = () => {
     // ---------------
     // VARIABLES
     // ---------------
-    const userBalances = walletBalances?.balances || [
-        { denom: 'umars', amount: '0' },
-    ]
-    const userBalance = userBalances[0].amount
+    const userBalances = walletBalances?.balances
+
+    const userBalance =
+        userBalances && userBalances.length ? userBalances[0].amount : '0'
     const [showDetails, setShowDetails] = useState(false)
 
     const viewOnFinder = useCallback(() => {
