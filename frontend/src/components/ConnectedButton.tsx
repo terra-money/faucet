@@ -6,11 +6,12 @@ import styles from './ConnectButton.module.scss'
 import { CheckSVG, CopySVG, ExternalSVG, MarsSVG, WalletSVG } from './Svg'
 import {
     ChainInfoID,
+    fetchBalances,
     useWallet,
     useWalletManager,
 } from '@marsprotocol/wallet-connector'
 import { CircularProgress, ClickAwayListener } from '@material-ui/core'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useClipboard from 'react-use-clipboard'
 
@@ -24,7 +25,8 @@ const ConnectedButton = () => {
     // EXTERNAL HOOKS
     // ---------------
     const { disconnect } = useWalletManager()
-    const { name, address = '', chainInfo, walletBalances } = useWallet()
+    const { name, address = '', chainInfo } = useWallet()
+    const [userBalance, setUserBalance] = useState<string | undefined>()
     const { t } = useTranslation()
     const [isCopied, setCopied] = useClipboard(address, {
         successDuration: 1000 * 5,
@@ -33,10 +35,7 @@ const ConnectedButton = () => {
     // ---------------
     // VARIABLES
     // ---------------
-    const userBalances = walletBalances?.balances
 
-    const userBalance =
-        userBalances && userBalances.length ? userBalances[0].amount : '0'
     const [showDetails, setShowDetails] = useState(false)
 
     const viewOnFinder = useCallback(() => {
@@ -49,6 +48,20 @@ const ConnectedButton = () => {
     const onClickAway = useCallback(() => {
         setShowDetails(false)
     }, [])
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const userBalances = await fetchBalances(
+                address,
+                chainInfo?.chainId
+            )
+
+            if (userBalances && userBalances.balances?.length) {
+                setUserBalance(userBalances.balances[0].amount)
+            }
+        }, 3000)
+        return () => clearInterval(interval)
+    }, [address, chainInfo])
 
     return (
         <>
@@ -73,7 +86,7 @@ const ConnectedButton = () => {
                     {name ? name : truncate(address, [2, 4])}
                 </span>
                 <div className={styles.balance}>
-                    {walletBalances ? (
+                    {userBalance ? (
                         `${formatValue(
                             lookup(
                                 Number(userBalance),
