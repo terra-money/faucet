@@ -1,19 +1,15 @@
-import { formatValue, lookup } from '../libs/parse'
-import { truncate } from '../libs/text'
-import colors from '../styles/_assets.module.scss'
-import Button from './Button'
-import CircularProgress from './CircularProgress'
-import styles from './ConnectButton.module.scss'
-import { CheckSVG, CopySVG, ExternalSVG, MarsSVG, WalletSVG } from './Svg'
-import {
-    ChainInfoID,
-    fetchBalances,
-    useWallet,
-    useWalletManager,
-} from '@marsprotocol/wallet-connector'
-import { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import useClipboard from 'react-use-clipboard'
+import { formatValue, lookup } from '../libs/parse';
+import { truncate } from '../libs/text';
+import colors from '../styles/_assets.module.scss';
+import Button from './Button';
+import CircularProgress from './CircularProgress';
+import styles from './ConnectButton.module.scss';
+import { CheckSVG, CopySVG, ExternalSVG, MarsSVG, WalletSVG } from './Svg';
+import { ChainInfoID, fetchBalances, useWallet, useWalletManager } from '@marsprotocol/wallet-connector';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import useClipboard from 'react-use-clipboard';
+
 
 const ConnectedButton = () => {
     // ----------------
@@ -58,10 +54,14 @@ const ConnectedButton = () => {
 
             if (userBalances && userBalances.balances?.length) {
                 setUserBalance(userBalances.balances[0].amount)
+            } else {
+                if (!userBalance) {
+                    setUserBalance('0')
+                }
             }
         }, 3000)
         return () => clearInterval(interval)
-    }, [address, chainInfo])
+    }, [address, chainInfo, userBalance])
 
     return (
         <>
