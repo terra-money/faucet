@@ -1,15 +1,14 @@
-import styles from './App.module.scss'
-import Header from './components/Header'
-import Home from './components/Home'
-import Intro from './components/Intro'
-import './i18n'
+import Header from '../components/Header'
+import Home from '../components/Home'
+import Intro from '../components/Intro'
+import styles from './index.module.scss'
 import {
     WalletConnectionStatus,
     useWallet,
 } from '@marsprotocol/wallet-connector'
 import { useEffect, useState } from 'react'
 
-const App = () => {
+const Index = () => {
     const { status } = useWallet()
     const [isConnected, setIsConnected] = useState(false)
 
@@ -42,4 +41,4 @@ const App = () => {
     )
 }
 
-export default App
+export default Index

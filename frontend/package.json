@@ -3,11 +3,9 @@
     "version": "0.7.5",
     "private": true,
     "scripts": {
-        "preinstall": "npx npm-force-resolutions",
-        "start": "REACT_APP_STAGE=localhost react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
     },
     "eslintConfig": {
         "extends": [
@@ -33,7 +31,10 @@
         "bignumber.js": "^9.0.2",
         "i18next": "^21.8.13",
         "i18next-browser-languagedetector": "^6.1.4",
-        "i18next-xhr-backend": "^3.2.2",
+        "i18next-http-backend": "^1.4.1",
+        "make-plural": "^7.1.0",
+        "next": "^12.2.5",
+        "next-i18next": "^11.3.0",
         "numeral": "^2.0.6",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",

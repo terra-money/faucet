@@ -1,4 +1,3 @@
-import redBank from '../images/redbank.svg'
 import ConnectButton from './ConnectButton'
 import styles from './Intro.module.scss'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +9,7 @@ const Intro = () => {
         <section className={styles.intro}>
             <div className={styles.content}>
                 <img
-                    src={redBank}
+                    src='/images/redbank.svg'
                     className={styles.redbank}
                     alt={t('faucet.marsTestnetFaucet')}
                 />

@@ -44,7 +44,7 @@ $backgroundBodyDark: #141621;
 @mixin bgBody {
     background-color: $backgroundBody;
     background-size: 100% auto;
-    background-image: url('../images/bg.svg');
+    background-image: url('/images/bg.svg');
     background-position: center top;
 }
 

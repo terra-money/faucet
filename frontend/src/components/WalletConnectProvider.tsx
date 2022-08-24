@@ -1,5 +1,3 @@
-import KeplrImage from '../images/wallets/keplr-wallet-extension.png'
-import WalletConnectImage from '../images/wallets/keplr-walletconnect.png'
 import buttonStyles from './Button.module.scss'
 import CircularProgress from './CircularProgress'
 import styles from './WalletConnectProvider.module.scss'
@@ -53,14 +51,14 @@ const CosmosWalletConnectProvider: FC<WrapperComponent> = ({ children }) => {
                         description: (
                             <Trans i18nKey='global.keplrBrowserExtension' />
                         ),
-                        imageUrl: KeplrImage,
+                        imageUrl: '/images/wallets/keplr-wallet-extension.png',
                     },
                     [WalletType.WalletConnectKeplr]: {
                         name: <Trans i18nKey='global.walletConnect' />,
                         description: (
                             <Trans i18nKey='global.walletConnectDescription' />
                         ),
-                        imageUrl: WalletConnectImage,
+                        imageUrl: '/images/wallets/keplr-walletconnect.png',
                     },
                 }}
                 localStorageKey='walletConnection'

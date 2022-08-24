@@ -5,3 +5,4 @@ faucet
 db/
 env.json
 .envrc
+.next
