@@ -19,7 +19,7 @@
     "react-dom": "^17",
     "react-google-recaptcha": "^2.1.0",
     "react-router-dom": "^5",
-    "react-scripts": "^4",
+    "react-scripts": "^5",
     "react-toastify": "^7",
     "sass": "^1.32.12",
     "typescript": "^4",
