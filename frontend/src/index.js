@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
 import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -13,27 +12,20 @@ class Root extends Component {
   };
 
   state = {
-    network: networks[0].chainId,
+    network: networks[0].chainID,
     setNetwork: this.setNetwork,
   };
 
   render() {
     return (
       <NetworkContext.Provider value={this.state}>
-        <Route>
-          <App />
-        </Route>
+        <App />
       </NetworkContext.Provider>
     );
   }
 }
 
-ReactDOM.render(
-  <Router>
-    <Root />
-  </Router>,
-  document.getElementById('root')
-);
+ReactDOM.render(<Root />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

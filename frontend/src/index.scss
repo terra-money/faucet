@@ -1,30 +1,12 @@
-html {
-  -webkit-text-size-adjust: none;
-  -moz-text-size-adjust: none;
-  -ms-text-size-adjust: none;
-}
-
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Gotham A', 'Gotham B', 'Helvetica Neue', 'Arial', sans-serif !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f8f9fe !important;
+  font-family: 'Gotham', 'Helvetica Neue', 'Arial', sans-serif !important;
+  background-color: black;
   color: #2043b5 !important;
-  font-size: 16px !important;
-  font-style: normal;
-  letter-spacing: -0.2px !important;
-  padding: 50px 0 0;
-}
-
-input,
-textarea,
-button {
-  font-family: 'Gotham A', 'Gotham B', 'Helvetica Neue', 'Arial', sans-serif !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.2px !important;
+  font-size: 16px;
+  letter-spacing: -0.1px !important;
+  height: 100vh;
 }
 
 a {
@@ -32,11 +14,13 @@ a {
   text-decoration: none;
 }
 
-@media screen and (min-width: 360px) {
-  body {
-    padding: 50px 10px 0;
-  }
-}
-
-@media screen and (min-width: 680px) {
+/* latin-ext */
+@font-face {
+  font-family: 'Gotham';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(./assets/fonts/gotham-book.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }

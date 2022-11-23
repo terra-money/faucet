@@ -23,9 +23,12 @@ docker build -t faucet .
 Run it with the mnemonic and recaptcha key as env vars.
 
 ```bash
-docker run -p 3000:3000 \
-    -e MNEMONIC=$MY_MNEMONIC \
-    -e RECAPTCHA_KEY=$RECAPTCHA_KEY \
-    -e PORT=8080 \  # default to 3000
+# Mnemonic must be splitted by _
+export MNEMONIC=
+export PORT=4501
+
+docker run -p $PORT:$PORT \
+    -e MNEMONIC=$MNEMONIC \
+    -e PORT=$PORT \
     faucet
 ```

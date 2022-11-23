@@ -1,3 +1,11 @@
+#root {
+  background: url(./assets/background.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  height: inherit;
+}
+
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -78,9 +86,6 @@ section {
   }
   article {
     line-height: 1.5;
-  }
-  .recaptcha {
-    margin: 30px 0 20px;
   }
   .inputContainer {
     ::placeholder {
@@ -188,7 +193,7 @@ section {
       border-radius: 25px;
       box-shadow: 0 1px 1px 0 rgba(14, 60, 165, 0.1);
       outline: 0;
-      width: 100%;
+      width: 100% !important;
       cursor: pointer;
       &:first-of-type {
         margin-bottom: 12px;

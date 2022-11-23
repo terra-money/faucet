@@ -1,10 +1,8 @@
 module github.com/terra-project/faucet
 
 require (
-	github.com/PagerDuty/go-pagerduty v1.5.0
 	github.com/cosmos/cosmos-sdk v0.45.4
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/dpapathanasiou/go-recaptcha v0.0.0-20190121160230-be5090b17804
 	github.com/rs/cors v1.8.2
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/tendermint/tendermint v0.34.19 // indirect
@@ -56,7 +54,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.0.1 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/orderedcode v0.0.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect

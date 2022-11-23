@@ -7,15 +7,17 @@ import NetworkContext from '../contexts/NetworkContext';
 const SelectNetworks = (props) => {
   const { network, setNetwork } = useContext(NetworkContext);
 
+  const onChange = (e) => {
+    setNetwork(e.target.value);
+  };
+
   return (
     <div className={props.className}>
-      <select
-        className={s.select}
-        value={network}
-        onChange={(e) => setNetwork(e.target.value)}
-      >
-        {networks.map(({ chainId }, index) => (
-          <option key={index}>{chainId}</option>
+      <select className={s.select} value={network} onChange={onChange}>
+        {networks.map(({ chainID, name }, index) => (
+          <option value={chainID} key={index}>
+            {name}
+          </option>
         ))}
       </select>
       <div className={s.addon}>
