@@ -1,0 +1,17 @@
+.AppHeader {
+  display: flex;
+  align-items: center;
+  background-color: rgba(38, 38, 38, 0.98);
+  color: #fff;
+  height: 50px;
+  padding: 0 20px;
+  font-size: 14px;
+  box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.5);
+
+  .FaucetLogo {
+    background: url(../../assets/terra_faucet.svg) top 15px left 20px no-repeat;
+    background-size: 140px auto;
+    flex-grow: 1;
+    height: 100%;
+  }
+}

@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 import * as bech32 from 'bech32';
 import { networks } from '../config';
 import 'react-toastify/dist/ReactToastify.css';
-import '../App.scss';
+import './Home.scss';
 import NetworkContext from '../contexts/NetworkContext';
 
 const sendSchema = Yup.object().shape({
@@ -115,7 +115,7 @@ class HomeComponent extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="Home">
         <ToastContainer
           position="top-right"
           autoClose={5000}
@@ -139,7 +139,7 @@ class HomeComponent extends React.Component {
             onSubmit={this.handleSubmit}
           >
             {({ errors, touched }) => (
-              <Form className="inputContainer">
+              <Form className="InputContainer">
                 <div className="input">
                   <Field
                     name="address"
@@ -183,7 +183,7 @@ class HomeComponent extends React.Component {
             generate an address with the Terra SDK.
           </article>
           <div className="buttonContainer">
-            <button className="light">
+            <button>
               <i aria-hidden="true" className="material-icons">
                 supervisor_account
               </i>

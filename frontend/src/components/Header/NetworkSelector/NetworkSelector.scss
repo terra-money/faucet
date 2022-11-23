@@ -1,0 +1,17 @@
+.NetworkSelectorWrapper {
+  .NetworkSelector {
+    width: 140px;
+    padding: 0.6em 0.2em 0.6em 0;
+    border-radius: 3px !important;
+    border: 1px solid hsla(0, 0%, 100%, 0.3) !important;
+
+    color: #fff !important;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+
+    option {
+      background-color: rgba(38, 38, 38, 0.98);
+    }
+  }
+}

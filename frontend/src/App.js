@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.scss';
-import SelectNetworks from './components/SelectNetworks';
+import Header from './components/Header/Header';
 import Home from './components/Home';
 
 class App extends Component {
@@ -10,9 +10,7 @@ class App extends Component {
   render() {
     return (
       <>
-        <header>
-          <SelectNetworks className="network_select" />
-        </header>
+        <Header />
         <Home />
         <footer>
           &copy; 2019-{this.showCurrentYear()} <span>Terra</span>

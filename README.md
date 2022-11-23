@@ -23,7 +23,8 @@ docker build -t faucet .
 Run it with the mnemonic and recaptcha key as env vars.
 
 ```bash
-# Mnemonic must be splitted by _
+# Mnemonic must be splitted by "_" (underscore) instead of " " (spaces) otherwise 
+# docker will interpret spaces as new arguments instead of a single argument
 export MNEMONIC=
 export PORT=4501
 
