@@ -201,9 +201,9 @@ class HomeComponent extends React.Component {
           </Formik>
         </section>
         <section>
-          <h2>Don't you have a testnet address?</h2>
+          <h2>Don't have a testnet address?</h2>
           <article>
-            There's two ways to get one. The first is by using Station, the
+            There are two ways to get one. The first is by using Station, the
             crypto wallet for Terra. If you know command-line-fu, you can also
             generate an address with the Terra SDK.
           </article>
@@ -214,7 +214,7 @@ class HomeComponent extends React.Component {
               </i>
               <span>
                 <a
-                  href="https://docs.terra.money/Tutorials/Get-started/Use-Terra-Station.html"
+                  href="https://docs.terra.money/learn/station/testnet"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
