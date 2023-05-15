@@ -51,7 +51,7 @@ var lcdURL string
 var chainID string
 var privKey cryptotypes.PrivKey
 
-//var privKey crypto.PrivKey
+// var privKey crypto.PrivKey
 var address string
 var sequence uint64
 var accountNumber uint64
@@ -79,7 +79,8 @@ const ( // new core hasn't these yet.
 )
 
 var amountTable = map[string]int64{
-	app.BondDenom: 5 * MicroUnit,
+	//Increase the amount of the coin to be sent from 5 to 20
+	app.BondDenom: 20 * MicroUnit,
 }
 
 const (
@@ -214,10 +215,9 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 	// try to update coin
 	for idx, coin := range requestLog.Coins {
 		if coin.Denom == denom {
-			if (requestLog.Coins[idx].Amount + amount) > amountTable[denom]*2 {
-				return errors.New("amount limit exceeded")
+			if (requestLog.Coins[idx].Amount + amount) > amountTable[denom]*5 {
+				return fmt.Errorf("amount limit exceeded: account is not eligible for additional faucet drops as it has already received the maximum monthly amount of %v", amountTable[denom]*5)
 			}
-
 			requestLog.Coins[idx].Amount += amount
 			return nil
 		}
@@ -231,10 +231,9 @@ func (requestLog *RequestLog) dripCoin(denom string) error {
 func checkAndUpdateLimit(db *leveldb.DB, account []byte, denom string) error {
 	address, _ := bech32.ConvertAndEncode("terra", account)
 
-	if getBalance(address) >= amountTable[denom]*2 {
-		return errors.New("amount limit exceeded")
+	if getBalance(address) >= amountTable[denom]*5 {
+		return fmt.Errorf("amount limit exceeded: account %v has a balance exceeding the maximum allowed amount of %v and cannot receive additional faucet drops", address, amountTable[denom]*5)
 	}
-
 	var requestLog RequestLog
 
 	logBytes, _ := db.Get(account, nil)
