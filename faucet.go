@@ -143,7 +143,7 @@ func loadAccountInfo() {
 	var seq uint64
 
 	if strings.Contains(bodyStr, `"sequence"`) {
-		seq, _ = strconv.ParseUint(parseRegexp(`"sequence": "?(\d+)"?`, bodyStr), 10, 64)
+		seq, _ = strconv.ParseUint(parseRegexp(`"sequence": ?"?(\d+)"?`, bodyStr), 10, 64)
 	} else {
 		seq = 0
 	}
@@ -151,7 +151,7 @@ func loadAccountInfo() {
 	sequence = atomic.LoadUint64(&seq)
 
 	if strings.Contains(bodyStr, `"account_number"`) {
-		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number": "?(\d+)"?`, bodyStr), 10, 64)
+		accountNumber, _ = strconv.ParseUint(parseRegexp(`"account_number": ?"?(\d+)"?`, bodyStr), 10, 64)
 	} else {
 		accountNumber = 0
 	}
@@ -195,7 +195,7 @@ func parseRegexp(regexpStr string, target string) (data string) {
 	groups := r.FindStringSubmatch(string(target))
 
 	if len(groups) != 2 {
-		os.Exit(1)
+		panic(fmt.Errorf("regex did not match %s, %s", regexpStr, target))
 	}
 
 	// Convert sequence string to int64
@@ -477,12 +477,12 @@ func signAndBroadcast(txBuilder client.TxBuilder, isDetectMismatch bool) string 
 		panic(err)
 	}
 
-	code, err := strconv.ParseUint(parseRegexp(`"code": ?(\d+)?`, stringBody), 10, 64)
+	code, err := strconv.ParseUint(parseRegexp(`"code": ?"?(\d+)"?`, stringBody), 10, 64)
 	if err != nil {
 		panic("failed to parse code from tx response")
 	}
 	if code != 0 {
-		panic(parseRegexp(`"raw_log": "?(\d+)"?`, stringBody))
+		panic(parseRegexp(`"raw_log": ?"?(\d+)"?`, stringBody))
 	}
 
 	if isDetectMismatch && strings.Contains(stringBody, "sequence mismatch") {
