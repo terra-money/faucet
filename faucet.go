@@ -395,6 +395,8 @@ type BroadcastReq struct {
 }
 
 func signAndBroadcast(txBuilder client.TxBuilder, isDetectMismatch bool) string {
+	// load account info to update sequence number
+	loadAccountInfo()
 	var broadcastReq BroadcastReq
 
 	pubKey := privKey.PubKey()
